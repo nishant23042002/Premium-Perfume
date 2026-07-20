@@ -51,6 +51,10 @@ const productSchema = new Schema(
     variants: { type: [variantSchema], required: true },
     images: { type: [imageSchema], required: true },
 
+    // Denormalized from variants — kept in sync by the pre-save hook below so
+    // listing pages can sort/filter by price without an aggregation pipeline.
+    minPrice: { type: Number, required: true, index: true },
+
     rating: {
       average: { type: Number, default: 0 },
       count: { type: Number, default: 0 },
@@ -73,6 +77,13 @@ const productSchema = new Schema(
   },
   { timestamps: true },
 );
+
+productSchema.pre("save", function (next) {
+  if (this.variants?.length) {
+    this.minPrice = Math.min(...this.variants.map((v) => v.price));
+  }
+  next();
+});
 
 export type Product = InferSchemaType<typeof productSchema>;
 

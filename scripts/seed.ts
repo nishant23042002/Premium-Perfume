@@ -51,7 +51,7 @@ async function seed() {
 
   const catByName = Object.fromEntries(categories.map((c) => [c.slug, c._id]));
 
-  const products = await ProductModel.insertMany([
+  const productSeedData = [
     {
       name: "Amber Reverie",
       slug: "amber-reverie",
@@ -213,7 +213,14 @@ async function seed() {
       isNewArrival: true,
       status: "active",
     },
-  ]);
+  ];
+
+  const products = await ProductModel.insertMany(
+    productSeedData.map((product) => ({
+      ...product,
+      minPrice: Math.min(...product.variants.map((v) => v.price)),
+    })),
+  );
 
   const productBySlug = Object.fromEntries(products.map((p) => [p.slug, p._id]));
 
