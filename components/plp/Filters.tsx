@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { SORT_OPTIONS } from "@/lib/data/products";
+import { SORT_OPTIONS } from "@/lib/product-sort";
 
 const CONCENTRATIONS = ["EDP", "EDT", "Parfum", "Attar", "Cologne"] as const;
 

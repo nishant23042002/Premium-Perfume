@@ -1,5 +1,8 @@
 import { connectToDatabase } from "@/lib/db/connect";
 import { ProductModel } from "@/models/Product";
+import { SORT_OPTIONS, type SortOption } from "@/lib/product-sort";
+
+export { SORT_OPTIONS, type SortOption };
 
 export type ProductCardData = {
   _id: string;
@@ -39,15 +42,6 @@ export async function getNewArrivals(limit = 4): Promise<ProductCardData[]> {
     .lean();
   return JSON.parse(JSON.stringify(products));
 }
-
-export type SortOption = "newest" | "price-asc" | "price-desc" | "rating";
-
-export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: "newest", label: "Newest" },
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "price-desc", label: "Price: High to Low" },
-  { value: "rating", label: "Top Rated" },
-];
 
 const SORT_MAP: Record<SortOption, Record<string, 1 | -1>> = {
   newest: { createdAt: -1 },

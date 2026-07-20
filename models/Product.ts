@@ -78,11 +78,10 @@ const productSchema = new Schema(
   { timestamps: true },
 );
 
-productSchema.pre("save", function (next) {
+productSchema.pre("save", function () {
   if (this.variants?.length) {
     this.minPrice = Math.min(...this.variants.map((v) => v.price));
   }
-  next();
 });
 
 export type Product = InferSchemaType<typeof productSchema>;
