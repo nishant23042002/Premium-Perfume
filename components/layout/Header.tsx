@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ShoppingBag, User } from "lucide-react";
+import { User } from "lucide-react";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { CartTrigger } from "@/components/layout/CartTrigger";
 import { Container } from "@/components/ui/Container";
 import { getNavCategories } from "@/lib/data/categories";
 import { siteConfig } from "@/lib/site";
@@ -47,9 +48,7 @@ export async function Header() {
           <Link href="/account" aria-label="Account" className="text-ink hover:text-accent-dark">
             <User className="h-5 w-5" strokeWidth={1.5} />
           </Link>
-          <Link href="/cart" aria-label="Cart" className="text-ink hover:text-accent-dark">
-            <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
-          </Link>
+          <CartTrigger />
         </div>
       </Container>
     </header>

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Price } from "@/components/ui/Price";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { Rating } from "@/components/ui/Rating";
+import { QuickAddButton } from "@/components/cart/QuickAddButton";
 import { getDefaultVariant } from "@/lib/product";
 import type { ProductCardData } from "@/lib/data/products";
 
@@ -11,8 +12,8 @@ export function ProductCard({ product }: { product: ProductCardData }) {
   const image = product.images[0];
 
   return (
-    <Link href={`/product/${product.slug}`} className="group flex flex-col gap-3">
-      <div className="relative aspect-[4/5] w-full">
+    <div className="group flex flex-col gap-3">
+      <Link href={`/product/${product.slug}`} className="relative block aspect-[4/5] w-full">
         {image && (
           <ProductImage
             publicId={image.publicId}
@@ -25,15 +26,17 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           {product.isNewArrival && <Badge tone="ink">New</Badge>}
           {product.isLimitedEdition && <Badge tone="secondary">Limited</Badge>}
         </div>
-      </div>
+      </Link>
 
-      <div className="flex flex-col gap-1.5">
+      <Link href={`/product/${product.slug}`} className="flex flex-col gap-1.5">
         <h3 className="font-display text-lg text-ink">{product.name}</h3>
         {product.rating.count > 0 && (
           <Rating value={product.rating.average} count={product.rating.count} />
         )}
         <Price value={variant.price} compareAtValue={variant.compareAtPrice} />
-      </div>
-    </Link>
+      </Link>
+
+      <QuickAddButton productId={product._id} sku={variant.sku} stock={variant.stock} />
+    </div>
   );
 }

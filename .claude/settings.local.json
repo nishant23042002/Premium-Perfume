@@ -3,7 +3,23 @@
     "allow": [
       "Bash(npm install *)",
       "Bash(npx tsc *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:3000/product/amber-reverie -o /tmp/pdp1.html -w \"%{http_code}\\\\n\")",
+      "Read(//tmp/**)",
+      "Bash(curl -s http://localhost:3000/product/clay-musk -o /tmp/pdp2.html -w \"%{http_code}\\\\n\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/product/does-not-exist)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/admin)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -u wrong:creds http://localhost:3000/admin)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -u admin:u1hb7tadmE03 http://localhost:3000/admin)",
+      "Bash(powershell -Command 'Get-CimInstance Win32_Process -Filter \"Name='\\\\''node.exe'\\\\''\" | Where-Object { $_.CommandLine -like '\\\\''*Premium-Perfume*'\\\\'' } | Select-Object ProcessId')",
+      "Bash(npx tsx *)",
+      "Bash(curl -s http://localhost:3000/ -o /tmp/home2.html)",
+      "Bash(curl -s http://localhost:3000/product/amber-reverie -o /tmp/pdp3.html)",
+      "Bash(grep -o \"jx5zrotxw1amsflo7rhc\" /tmp/pdp3.html | head -5 *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} | content-type: %{content_type} | size: %{size_download}\\\\n\" \"http://localhost:3000/_next/image?url=https%3A%2F%2Fres.cloudinary.com%2Frqyp45vu%2Fimage%2Fupload%2Ff_auto%2Cq_auto%2Cw_800%2Fvellora%2Fproducts%2Fjx5zrotxw1amsflo7rhc&w=828&q=75\")",
+      "Bash(curl -s http://localhost:3000/ -o /tmp/home3.html)",
+      "Bash(curl -s http://localhost:3000/product/amber-reverie -o /tmp/pdp4.html)"
     ]
   }
 }

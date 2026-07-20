@@ -21,3 +21,17 @@ export async function getFeaturedReviews(limit = 6): Promise<FeaturedReview[]> {
     .lean();
   return JSON.parse(JSON.stringify(reviews));
 }
+
+export type ProductReview = FeaturedReview;
+
+export async function getProductReviews(productId: string, limit = 10): Promise<ProductReview[]> {
+  await connectToDatabase();
+  const reviews = await ReviewModel.find(
+    { productId, status: "approved" },
+    "name rating title body isVerifiedPurchase",
+  )
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
+  return JSON.parse(JSON.stringify(reviews));
+}

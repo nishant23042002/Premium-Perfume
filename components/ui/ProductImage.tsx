@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import { FlaskConical } from "lucide-react";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
@@ -15,8 +18,9 @@ export function ProductImage({
   sizes?: string;
 }) {
   const src = getCloudinaryUrl(publicId, { width: 800 });
+  const [failed, setFailed] = useState(false);
 
-  if (!src) {
+  if (!src || failed) {
     return (
       <div
         className={cn(
@@ -31,7 +35,14 @@ export function ProductImage({
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
-      <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" />
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes={sizes}
+        className="object-cover"
+        onError={() => setFailed(true)}
+      />
     </div>
   );
 }

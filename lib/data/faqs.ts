@@ -13,3 +13,14 @@ export async function getFaqs(): Promise<FaqItem[]> {
   const faqs = await FAQModel.find({}, "question answer category").sort({ order: 1 }).lean();
   return JSON.parse(JSON.stringify(faqs));
 }
+
+export async function getFaqsForProduct(productId: string): Promise<FaqItem[]> {
+  await connectToDatabase();
+  const faqs = await FAQModel.find(
+    { $or: [{ productId }, { category: "product", productId: { $exists: false } }] },
+    "question answer category",
+  )
+    .sort({ order: 1 })
+    .lean();
+  return JSON.parse(JSON.stringify(faqs));
+}

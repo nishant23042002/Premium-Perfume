@@ -34,7 +34,7 @@ export function Button(props: ButtonAsButton | ButtonAsLink) {
   const { variant = "primary", size = "md", className, children, ...rest } = props;
 
   const classes = cn(
-    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-none font-sans font-medium uppercase tracking-[0.08em] transition-colors duration-200",
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-none font-sans font-medium uppercase tracking-[0.08em] transition-colors duration-200 disabled:pointer-events-none disabled:opacity-40",
     variantClasses[variant],
     sizeClasses[size],
     className,

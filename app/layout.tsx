@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { CartDrawer } from "@/components/cart/CartDrawer";
+import { CartProvider } from "@/lib/cart-context";
+import { getCart } from "@/lib/data/cart";
+import { getRecommendedProducts } from "@/lib/data/products";
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
@@ -26,20 +30,25 @@ export const metadata: Metadata = {
   description: siteConfig.description,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [cart, recommendations] = await Promise.all([getCart(), getRecommendedProducts(8)]);
+
   return (
     <html
       lang="en"
       className={`${playfair.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-ivory text-ink">
-        <Header />
-        <main className="flex flex-1 flex-col">{children}</main>
-        <Footer />
+        <CartProvider initialCart={cart} recommendations={recommendations}>
+          <Header />
+          <main className="flex flex-1 flex-col">{children}</main>
+          <Footer />
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   );
