@@ -41,9 +41,12 @@ export function Button(props: ButtonAsButton | ButtonAsLink) {
   );
 
   if ("href" in props && props.href) {
-    const { href, ...anchorRest } = rest as React.AnchorHTMLAttributes<HTMLAnchorElement>;
     return (
-      <Link href={props.href} className={classes} {...anchorRest}>
+      <Link
+        {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+        href={props.href}
+        className={classes}
+      >
         {children}
       </Link>
     );
