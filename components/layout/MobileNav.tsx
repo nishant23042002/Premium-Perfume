@@ -47,6 +47,13 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
             >
               Our Story
             </Link>
+            <Link
+              href="/contact"
+              onClick={() => setOpen(false)}
+              className="py-4 font-sans text-sm uppercase tracking-[0.1em] text-ink"
+            >
+              Contact
+            </Link>
           </nav>
         </div>
       )}

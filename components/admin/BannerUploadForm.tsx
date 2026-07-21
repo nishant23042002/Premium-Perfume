@@ -42,7 +42,9 @@ export function BannerUploadForm() {
       </p>
 
       <div className="flex flex-col gap-1">
-        <span className="text-xs font-medium text-gray-700">Desktop image (required)</span>
+        <span className="text-xs font-medium text-gray-700">
+          Desktop image (required) — recommended 1920×960 (2:1)
+        </span>
         <input
           type="file"
           name="image"
@@ -54,7 +56,8 @@ export function BannerUploadForm() {
 
       <div className="flex flex-col gap-1">
         <span className="text-xs font-medium text-gray-700">
-          Mobile image (optional — shown on phones instead of the desktop image above)
+          Mobile image (optional — shown on phones instead of the desktop image above) —
+          recommended 1080×1350 (4:5)
         </span>
         <input
           type="file"

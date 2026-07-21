@@ -43,7 +43,12 @@ export function HeroCarousel({ slides }: { slides: ActiveBanner[] }) {
 
   return (
     <section
-      className="relative flex min-h-[36rem] flex-col items-stretch justify-start overflow-hidden bg-ivory sm:min-h-[44rem] sm:justify-center lg:min-h-[52rem]"
+      // Aspect-ratio driven instead of fixed min-heights — the banner scales
+      // proportionally with viewport width at every breakpoint (portrait on
+      // phones, matching the admin's recommended upload ratio on desktop)
+      // instead of stretching a fixed-height box across whatever width the
+      // screen happens to be.
+      className="relative flex aspect-[4/5] max-h-[720px] flex-col items-stretch justify-start overflow-hidden bg-ivory sm:aspect-[3/2] sm:justify-center lg:aspect-[2/1]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >

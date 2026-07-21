@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useState, useTransition, type FormEvent } from "react";
+import { useEffect, useRef, useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 import { firebaseAuth } from "@/lib/firebase-client";
 import { loginWithPhone } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
+import { OtpInput } from "@/components/auth/OtpInput";
 
 const inputClass =
   "h-12 w-full border border-ink/20 bg-transparent px-4 font-sans text-base text-ink placeholder:text-ink/40 focus:border-accent-dark focus:outline-none";
@@ -56,6 +56,7 @@ export function PhoneLoginForm({
 
   const confirmationRef = useRef<ConfirmationResult | null>(null);
   const recaptchaRef = useRef<RecaptchaVerifier | null>(null);
+  const autoSubmittedCodeRef = useRef<string | null>(null);
 
   function getRecaptcha() {
     if (!recaptchaRef.current) {
@@ -87,14 +88,8 @@ export function PhoneLoginForm({
     });
   }
 
-  function handleVerifyOtp(event: FormEvent) {
-    event.preventDefault();
+  function verifyCode(code: string) {
     setError(null);
-
-    if (otp.length !== 6) {
-      setError("Enter the 6-digit code.");
-      return;
-    }
 
     startTransition(async () => {
       try {
@@ -105,7 +100,7 @@ export function PhoneLoginForm({
           return;
         }
 
-        const credential = await confirmation.confirm(otp);
+        const credential = await confirmation.confirm(code);
         const idToken = await credential.user.getIdToken();
 
         const formData = new FormData();
@@ -131,21 +126,39 @@ export function PhoneLoginForm({
     });
   }
 
+  function handleVerifySubmit(event: FormEvent) {
+    event.preventDefault();
+    if (otp.length !== 6) {
+      setError("Enter the 6-digit code.");
+      return;
+    }
+    verifyCode(otp);
+  }
+
+  // Submit automatically the moment all 6 digits are in, so a customer who
+  // types or pastes the full code never has to also tap "Verify".
+  useEffect(() => {
+    if (otp.length === 6 && autoSubmittedCodeRef.current !== otp) {
+      autoSubmittedCodeRef.current = otp;
+      verifyCode(otp);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [otp]);
+
   if (step === "otp") {
     return (
-      <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-2">
+      <form onSubmit={handleVerifySubmit} className="flex flex-col gap-5">
+        <label className="flex flex-col gap-3">
           <span className="font-sans text-xs font-semibold uppercase tracking-[0.15em] text-ink/50">
             Enter the 6-digit code sent to +91 {phone}
           </span>
-          <input
-            type="text"
-            inputMode="numeric"
-            maxLength={6}
-            placeholder="••••••"
+          <OtpInput
             value={otp}
-            onChange={(event) => setOtp(event.target.value.replace(/\D/g, ""))}
-            className={cn(inputClass, "text-center tracking-[0.4em]")}
+            onChange={(value) => {
+              autoSubmittedCodeRef.current = null;
+              setOtp(value);
+            }}
+            disabled={isPending}
           />
         </label>
 

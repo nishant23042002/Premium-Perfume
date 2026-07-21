@@ -78,6 +78,7 @@ const SORT_MAP: Record<SortOption, Record<string, 1 | -1>> = {
 export type ProductListParams = {
   categoryId?: string;
   productIds?: string[];
+  isBestseller?: boolean;
   concentrations?: string[];
   sort?: SortOption;
   page?: number;
@@ -98,6 +99,7 @@ export async function getProductList(params: ProductListParams): Promise<Product
   const {
     categoryId,
     productIds,
+    isBestseller,
     concentrations,
     sort = "newest",
     page = 1,
@@ -107,6 +109,7 @@ export async function getProductList(params: ProductListParams): Promise<Product
   const filter: Record<string, unknown> = { status: "active" };
   if (categoryId) filter.categoryIds = categoryId;
   if (productIds) filter._id = { $in: productIds };
+  if (isBestseller) filter.isBestseller = true;
   if (concentrations && concentrations.length > 0) filter.concentration = { $in: concentrations };
 
   const sortSpec = SORT_MAP[sort] ?? SORT_MAP.newest;

@@ -77,6 +77,9 @@ export function HeaderShell({
           <Link href="/about" className={navLinkClass}>
             Our Story
           </Link>
+          <Link href="/contact" className={navLinkClass}>
+            Contact
+          </Link>
         </nav>
 
         <div className="flex items-center gap-5">

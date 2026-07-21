@@ -42,13 +42,15 @@ export default async function CollectionPage({
   const concentrations = sp.concentration?.split(",").filter(Boolean);
   const sort = (sp.sort as SortOption) ?? "newest";
 
-  const { products, totalPages } = await getProductList({
-    productIds: collection.productIds,
-    concentrations,
-    sort,
-    page,
-    pageSize: PAGE_SIZE,
-  });
+  // "Bestsellers" is a flag-driven grouping (same isBestseller flag the
+  // homepage section uses) rather than a fixed product list — that way it
+  // stays accurate as products are added/removed, instead of drifting stale
+  // like a hardcoded productIds array would.
+  const { products, totalPages } = await getProductList(
+    slug === "bestsellers"
+      ? { isBestseller: true, concentrations, sort, page, pageSize: PAGE_SIZE }
+      : { productIds: collection.productIds, concentrations, sort, page, pageSize: PAGE_SIZE },
+  );
 
   return (
     <Section tone="ivory">
