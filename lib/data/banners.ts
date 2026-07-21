@@ -6,15 +6,16 @@ export type ActiveBanner = {
   title?: string;
   subtitle?: string;
   image: { publicId: string; alt: string };
+  mobileImage?: { publicId: string; alt: string };
   linkHref?: string;
 };
 
-export async function getActiveBanner(placement: string): Promise<ActiveBanner | null> {
+export async function getActiveBanners(placement: string): Promise<ActiveBanner[]> {
   await connectToDatabase();
-  const banner = await BannerModel.findOne({ placement, isActive: true })
+  const banners = await BannerModel.find({ placement, isActive: true })
     .sort({ order: 1, createdAt: -1 })
     .lean();
-  return banner ? JSON.parse(JSON.stringify(banner)) : null;
+  return JSON.parse(JSON.stringify(banners));
 }
 
 export type AdminBanner = {
@@ -22,13 +23,15 @@ export type AdminBanner = {
   title?: string;
   subtitle?: string;
   image: { publicId: string; alt: string };
+  mobileImage?: { publicId: string; alt: string };
   placement: string;
   isActive: boolean;
+  order: number;
   createdAt: string;
 };
 
 export async function getAllBanners(): Promise<AdminBanner[]> {
   await connectToDatabase();
-  const banners = await BannerModel.find({}).sort({ createdAt: -1 }).lean();
+  const banners = await BannerModel.find({}).sort({ order: 1, createdAt: -1 }).lean();
   return JSON.parse(JSON.stringify(banners));
 }

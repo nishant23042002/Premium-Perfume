@@ -40,8 +40,10 @@ export function Filters() {
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-ink/10 pb-6">
-      <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col gap-4 border-b border-ink/10 pb-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+      {/* Horizontal scroll on mobile avoids an ugly multi-row chip wrap;
+          reverts to a natural wrap once there's enough width to spare. */}
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
         {CONCENTRATIONS.map((concentration) => {
           const active = activeConcentrations.includes(concentration);
           return (
@@ -51,7 +53,7 @@ export function Filters() {
               aria-pressed={active}
               onClick={() => toggleConcentration(concentration)}
               className={cn(
-                "border px-3 py-1.5 font-sans text-xs uppercase tracking-[0.08em] transition-colors",
+                "shrink-0 border px-3 py-1.5 font-sans text-xs uppercase tracking-[0.08em] transition-colors",
                 active
                   ? "border-accent-dark bg-accent/15 text-accent-dark"
                   : "border-ink/20 text-ink/60 hover:border-ink/40",
@@ -63,7 +65,7 @@ export function Filters() {
         })}
       </div>
 
-      <label className="flex items-center gap-2 font-sans text-xs text-ink/60">
+      <label className="flex items-center justify-between gap-3 font-sans text-xs text-ink/60 sm:justify-start">
         Sort by
         <select
           value={activeSort}

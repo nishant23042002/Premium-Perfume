@@ -8,6 +8,7 @@ import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { ProductCard } from "@/components/product/ProductCard";
 import { getCart } from "@/lib/data/cart";
 import { getRecommendedProducts } from "@/lib/data/products";
+import { getCurrentUser } from "@/lib/data/users";
 
 export const metadata: Metadata = { title: "Checkout" };
 
@@ -15,7 +16,7 @@ const FREE_SHIPPING_THRESHOLD = 999;
 const SHIPPING_FEE = 99;
 
 export default async function CheckoutPage() {
-  const cart = await getCart();
+  const [cart, user] = await Promise.all([getCart(), getCurrentUser()]);
   if (cart.items.length === 0) redirect("/perfumes");
 
   const shippingFee = cart.subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
@@ -36,7 +37,7 @@ export default async function CheckoutPage() {
               align="left"
               className="pb-8"
             />
-            <CheckoutForm />
+            <CheckoutForm savedAddresses={user?.addresses ?? []} />
           </div>
 
           {upsell.length > 0 && (

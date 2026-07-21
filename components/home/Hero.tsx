@@ -1,46 +1,34 @@
-import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Divider } from "@/components/ui/Divider";
 import { Section } from "@/components/ui/Section";
-import { getActiveBanner } from "@/lib/data/banners";
-import { getCloudinaryUrl } from "@/lib/cloudinary";
+import { HeroCarousel } from "@/components/home/HeroCarousel";
+import { getActiveBanners } from "@/lib/data/banners";
 import { siteConfig } from "@/lib/site";
 
 export async function Hero() {
-  const banner = await getActiveBanner("homepage-hero");
-  const bannerUrl = banner ? getCloudinaryUrl(banner.image.publicId, { width: 1920 }) : null;
+  const banners = await getActiveBanners("homepage-hero");
+
+  if (banners.length > 0) {
+    return <HeroCarousel slides={banners} />;
+  }
 
   return (
     <Section
       tone="ivory"
-      className="relative flex flex-col items-center gap-6 overflow-hidden bg-gradient-to-b from-ivory via-ivory to-accent/10 text-center"
+      className="flex flex-col items-center gap-6 bg-gradient-to-b from-ivory via-ivory to-accent/10 text-center"
     >
-      {bannerUrl && banner && (
-        <>
-          <Image
-            src={bannerUrl}
-            alt={banner.image.alt}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-ivory/85 via-ivory/70 to-ivory/90" />
-        </>
-      )}
-
-      <Container className="relative flex flex-col items-center gap-6">
+      <Container className="flex flex-col items-center gap-6">
         <span className="font-sans text-xs uppercase tracking-[0.4em] text-accent-dark">
-          {banner?.subtitle || "Crafted in small batches"}
+          Crafted in small batches
         </span>
         <h1 className="max-w-2xl font-display text-5xl text-secondary sm:text-7xl">
-          {banner?.title || siteConfig.tagline}
+          {siteConfig.tagline}
         </h1>
         <p className="max-w-md font-sans text-base text-ink/70">{siteConfig.description}</p>
         <Divider />
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <Button href={banner?.linkHref || "/perfumes"} variant="primary" size="lg">
+          <Button href="/perfumes" variant="primary" size="lg">
             Shop the Collection
           </Button>
           <Button

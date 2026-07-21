@@ -19,7 +19,19 @@
       "Bash(grep -o \"jx5zrotxw1amsflo7rhc\" /tmp/pdp3.html | head -5 *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code} | content-type: %{content_type} | size: %{size_download}\\\\n\" \"http://localhost:3000/_next/image?url=https%3A%2F%2Fres.cloudinary.com%2Frqyp45vu%2Fimage%2Fupload%2Ff_auto%2Cq_auto%2Cw_800%2Fvellora%2Fproducts%2Fjx5zrotxw1amsflo7rhc&w=828&q=75\")",
       "Bash(curl -s http://localhost:3000/ -o /tmp/home3.html)",
-      "Bash(curl -s http://localhost:3000/product/amber-reverie -o /tmp/pdp4.html)"
+      "Bash(curl -s http://localhost:3000/product/amber-reverie -o /tmp/pdp4.html)",
+      "Bash(curl -s http://localhost:3000/ -o /tmp/home_carousel.html)",
+      "Bash(curl -s -u admin:u1hb7tadmE03 http://localhost:3000/admin -o /tmp/admin_check.html)",
+      "Bash(curl -s http://localhost:3000/ -o /tmp/final_check.html)",
+      "Bash(powershell -Command 'Stop-Process -Id 15124,24760,26836 -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 1; Get-CimInstance Win32_Process -Filter \"Name='\\\\''node.exe'\\\\''\" | Where-Object { $_.CommandLine -like '\\\\''*Premium-Perfume*'\\\\'' } | Select-Object ProcessId')",
+      "Bash(powershell -Command 'Stop-Process -Id 16512,1580,14512 -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 1; Get-CimInstance Win32_Process -Filter \"Name='\\\\''node.exe'\\\\''\" | Where-Object { $_.CommandLine -like '\\\\''*Premium-Perfume*'\\\\'' }')",
+      "Bash(powershell -Command 'Stop-Process -Id 30052,29456,34236 -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 1; Get-CimInstance Win32_Process -Filter \"Name='\\\\''node.exe'\\\\''\" | Where-Object { $_.CommandLine -like '\\\\''*Premium-Perfume*'\\\\'' }')",
+      "Bash(node -e \"require.resolve\\('server-only'\\)\")",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(48\\).toString\\('hex'\\)\\)\")",
+      "Bash(npx eslint *)",
+      "Bash(echo \"EXIT:$?\")",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
+      "Bash(node -e \"const icons = require\\('lucide-react'\\); console.log\\(['Home','Store','ShoppingBag','User','LayoutGrid'].map\\(n => n + ': ' + \\(n in icons\\)\\).join\\('\\\\n'\\)\\)\")"
     ]
   }
 }

@@ -18,9 +18,13 @@ const addressSchema = new Schema(
 
 const userSchema = new Schema(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    phone: { type: String },
+    // Phone is the primary identity — verified via Firebase Phone Auth OTP
+    // at login time, so it's always present and trustworthy. Name/email are
+    // optional, collected later if the customer chooses to fill in a profile.
+    phone: { type: String, required: true, unique: true, trim: true },
+    firebaseUid: { type: String, required: true, unique: true },
+    name: { type: String },
+    email: { type: String, lowercase: true, trim: true },
     addresses: { type: [addressSchema], default: [] },
   },
   { timestamps: true },

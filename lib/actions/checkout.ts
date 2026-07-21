@@ -8,6 +8,7 @@ import { CartModel } from "@/models/Cart";
 import { ProductModel } from "@/models/Product";
 import { OrderModel } from "@/models/Order";
 import { getCartSessionId } from "@/lib/cart-session";
+import { getSession } from "@/lib/auth-session";
 
 export type CheckoutState = { error?: string };
 
@@ -89,9 +90,11 @@ export async function placeOrder(
   };
 
   const orderNumber = `VEL-${Date.now().toString(36).toUpperCase()}`;
+  const session = await getSession();
 
   const order = await OrderModel.create({
     orderNumber,
+    userId: session?.userId,
     items: orderItems,
     shippingAddress,
     subtotal,

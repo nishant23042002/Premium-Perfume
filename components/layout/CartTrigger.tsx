@@ -11,7 +11,7 @@ export function CartTrigger() {
       type="button"
       onClick={openCart}
       aria-label="Open cart"
-      className="relative text-ink hover:text-accent-dark"
+      className="relative text-ink transition-colors duration-300 hover:text-accent-dark"
     >
       <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
       {cart.itemCount > 0 && (

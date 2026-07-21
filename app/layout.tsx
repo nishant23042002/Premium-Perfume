@@ -4,8 +4,12 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { CartProvider } from "@/lib/cart-context";
+import { LoginModal } from "@/components/auth/LoginModal";
+import { AuthModalProvider } from "@/lib/auth-modal-context";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { getCart } from "@/lib/data/cart";
 import { getRecommendedProducts } from "@/lib/data/products";
+import { getCurrentUser } from "@/lib/data/users";
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
@@ -35,20 +39,28 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [cart, recommendations] = await Promise.all([getCart(), getRecommendedProducts(8)]);
+  const [cart, recommendations, user] = await Promise.all([
+    getCart(),
+    getRecommendedProducts(8),
+    getCurrentUser(),
+  ]);
 
   return (
     <html
       lang="en"
       className={`${playfair.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-ivory text-ink">
-        <CartProvider initialCart={cart} recommendations={recommendations}>
-          <Header />
-          <main className="flex flex-1 flex-col">{children}</main>
-          <Footer />
-          <CartDrawer />
-        </CartProvider>
+      <body className="flex min-h-full flex-col bg-ivory pb-16 text-ink lg:pb-0">
+        <AuthModalProvider>
+          <CartProvider initialCart={cart} recommendations={recommendations}>
+            <Header />
+            <main className="flex flex-1 flex-col">{children}</main>
+            <Footer />
+            <CartDrawer />
+            <MobileBottomNav isLoggedIn={Boolean(user)} />
+          </CartProvider>
+          <LoginModal />
+        </AuthModalProvider>
       </body>
     </html>
   );

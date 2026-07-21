@@ -33,3 +33,27 @@ export async function getOrderByNumber(orderNumber: string): Promise<OrderDetail
   const order = await OrderModel.findOne({ orderNumber }).lean();
   return order ? JSON.parse(JSON.stringify(order)) : null;
 }
+
+export type OrderSummary = {
+  orderNumber: string;
+  itemCount: number;
+  total: number;
+  status: string;
+  createdAt: string;
+};
+
+export async function getOrdersByUserId(userId: string): Promise<OrderSummary[]> {
+  await connectToDatabase();
+  const orders = await OrderModel.find({ userId })
+    .sort({ createdAt: -1 })
+    .select("orderNumber items total status createdAt")
+    .lean();
+
+  return orders.map((order) => ({
+    orderNumber: order.orderNumber,
+    itemCount: order.items.reduce((sum: number, item: { quantity: number }) => sum + item.quantity, 0),
+    total: order.total,
+    status: order.status,
+    createdAt: order.createdAt.toISOString(),
+  }));
+}

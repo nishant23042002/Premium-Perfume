@@ -15,7 +15,7 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-10 w-10 items-center justify-center text-ink"
+        className="flex h-10 w-10 items-center justify-center text-ink transition-colors duration-300"
       >
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>

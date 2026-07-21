@@ -10,6 +10,14 @@ const bannerSchema = new Schema(
       width: { type: Number },
       height: { type: Number },
     },
+    // Optional art-directed crop shown on phones instead of `image` — falls
+    // back to `image` when not provided so older banners keep working.
+    mobileImage: {
+      publicId: { type: String },
+      alt: { type: String },
+      width: { type: Number },
+      height: { type: Number },
+    },
     linkHref: { type: String },
     placement: {
       type: String,

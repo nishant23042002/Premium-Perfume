@@ -7,10 +7,10 @@ export type ActiveAnnouncement = {
   link?: string;
 };
 
-export async function getActiveAnnouncement(): Promise<ActiveAnnouncement | null> {
+export async function getActiveAnnouncements(): Promise<ActiveAnnouncement[]> {
   await connectToDatabase();
   const now = new Date();
-  const announcement = await AnnouncementModel.findOne({
+  const announcements = await AnnouncementModel.find({
     isActive: true,
     $and: [
       { $or: [{ startsAt: { $exists: false } }, { startsAt: null }, { startsAt: { $lte: now } }] },
@@ -20,5 +20,5 @@ export async function getActiveAnnouncement(): Promise<ActiveAnnouncement | null
     .sort({ order: 1 })
     .lean();
 
-  return announcement ? JSON.parse(JSON.stringify(announcement)) : null;
+  return JSON.parse(JSON.stringify(announcements));
 }

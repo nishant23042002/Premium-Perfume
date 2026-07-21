@@ -29,15 +29,40 @@ export function BannerUploadForm() {
           placeholder="Alt text (required)"
           className={inputClass}
         />
+        <input
+          name="order"
+          type="number"
+          placeholder="Slide order (optional, default 0)"
+          className={inputClass}
+        />
+      </div>
+      <p className="text-xs text-gray-500">
+        Multiple active banners auto-rotate as a carousel every 5 seconds, ordered by this number
+        (lowest first).
+      </p>
+
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-medium text-gray-700">Desktop image (required)</span>
+        <input
+          type="file"
+          name="image"
+          accept="image/*"
+          required
+          className="text-sm text-gray-700 file:mr-3 file:border-0 file:bg-gray-900 file:px-3 file:py-2 file:text-xs file:font-medium file:uppercase file:text-white"
+        />
       </div>
 
-      <input
-        type="file"
-        name="image"
-        accept="image/*"
-        required
-        className="text-sm text-gray-700 file:mr-3 file:border-0 file:bg-gray-900 file:px-3 file:py-2 file:text-xs file:font-medium file:uppercase file:text-white"
-      />
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-medium text-gray-700">
+          Mobile image (optional — shown on phones instead of the desktop image above)
+        </span>
+        <input
+          type="file"
+          name="mobileImage"
+          accept="image/*"
+          className="text-sm text-gray-700 file:mr-3 file:border-0 file:bg-gray-900 file:px-3 file:py-2 file:text-xs file:font-medium file:uppercase file:text-white"
+        />
+      </div>
 
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
       {state?.success && <p className="text-sm text-green-700">{state.success}</p>}
