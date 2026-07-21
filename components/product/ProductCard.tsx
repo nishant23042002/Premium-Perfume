@@ -25,11 +25,17 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           {product.isBestseller && <Badge tone="accent">Bestseller</Badge>}
           {product.isNewArrival && <Badge tone="ink">New</Badge>}
           {product.isLimitedEdition && <Badge tone="secondary">Limited</Badge>}
+          {product.isComingSoon && <Badge tone="secondary">Coming Soon</Badge>}
         </div>
       </Link>
 
       <Link href={`/product/${product.slug}`} className="flex flex-col gap-1.5">
-        <h3 className="font-display text-lg text-ink">{product.name}</h3>
+        {product.shortDescription && (
+          <span className="line-clamp-1 font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-dark">
+            {product.shortDescription}
+          </span>
+        )}
+        <h3 className="line-clamp-1 font-display text-lg text-ink">{product.name}</h3>
         {product.rating.count > 0 && (
           <Rating value={product.rating.average} count={product.rating.count} />
         )}

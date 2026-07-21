@@ -6,6 +6,7 @@ import { X, Sparkles, Truck, MapPin, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthModal } from "@/lib/auth-modal-context";
 import { PhoneLoginForm } from "@/components/auth/PhoneLoginForm";
+import { siteConfig } from "@/lib/site";
 
 const PERKS = [
   { icon: Truck, text: "Track every order in one place" },
@@ -66,7 +67,7 @@ export function LoginModal() {
               Members Get More
             </span>
             <h3 className="font-display text-2xl leading-tight text-secondary">
-              Sign in for a faster, more personal Vellora.
+              Sign in for a faster, more personal experience with {siteConfig.name}.
             </h3>
           </div>
 

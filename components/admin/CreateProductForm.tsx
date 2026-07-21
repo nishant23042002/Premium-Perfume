@@ -69,6 +69,25 @@ export function CreateProductForm({ categories }: { categories: NavCategory[] })
         <input name="stock" type="number" min="0" placeholder="Stock (default 0)" className={inputClass} />
       </div>
 
+      <div className="grid gap-3 sm:grid-cols-2">
+        <input
+          name="ratingAverage"
+          type="number"
+          min="0"
+          max="5"
+          step="0.1"
+          placeholder="Rating average, 0-5 (optional)"
+          className={inputClass}
+        />
+        <input
+          name="ratingCount"
+          type="number"
+          min="0"
+          placeholder="Rating count / review total (optional)"
+          className={inputClass}
+        />
+      </div>
+
       {categories.length > 0 && (
         <div className="flex flex-col gap-2">
           <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -93,6 +112,10 @@ export function CreateProductForm({ categories }: { categories: NavCategory[] })
         <label className="flex items-center gap-2 text-sm text-gray-700">
           <input type="checkbox" name="isNewArrival" />
           Show in New Arrivals
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          <input type="checkbox" name="isComingSoon" />
+          Mark as Coming Soon
         </label>
       </div>
 

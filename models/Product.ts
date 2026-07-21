@@ -63,6 +63,7 @@ const productSchema = new Schema(
     isBestseller: { type: Boolean, default: false },
     isNewArrival: { type: Boolean, default: false },
     isLimitedEdition: { type: Boolean, default: false },
+    isComingSoon: { type: Boolean, default: false },
 
     seo: {
       metaTitle: { type: String },

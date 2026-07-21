@@ -4,20 +4,19 @@ import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ProductCard } from "@/components/product/ProductCard";
 import { cn, adaptiveProductGridColumns } from "@/lib/utils";
-import { getNewArrivals } from "@/lib/data/products";
-import { siteConfig } from "@/lib/site";
+import { getComingSoonProducts } from "@/lib/data/products";
 
-export async function NewArrivals() {
-  const products = await getNewArrivals(4);
+export async function ComingSoon() {
+  const products = await getComingSoonProducts(4);
   if (products.length === 0) return null;
 
   return (
-    <Section tone="ivory">
+    <Section tone="ivory-2">
       <Container className="flex flex-col gap-10">
         <SectionHeading
-          eyebrow="Just Landed"
-          title="New Arrivals"
-          description={`The newest additions to the ${siteConfig.name} collection.`}
+          eyebrow="On The Horizon"
+          title="Coming Soon"
+          description="A first look at what's arriving next."
         />
         <div
           className={cn(
@@ -30,8 +29,8 @@ export async function NewArrivals() {
           ))}
         </div>
         <div className="flex justify-center">
-          <Button href="/perfumes?sort=newest" variant="secondary">
-            View All New Arrivals
+          <Button href="/perfumes?comingSoon=true" variant="secondary">
+            View All Coming Soon
           </Button>
         </div>
       </Container>

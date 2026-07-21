@@ -161,6 +161,13 @@ export async function createProductAction(
     const description = String(formData.get("description") ?? "").trim();
     const stock = Number.isFinite(stockRaw) ? stockRaw : 0;
 
+    const ratingAverageRaw = Number(formData.get("ratingAverage"));
+    const ratingCountRaw = Number(formData.get("ratingCount"));
+    const ratingAverage = Number.isFinite(ratingAverageRaw)
+      ? Math.max(0, Math.min(5, ratingAverageRaw))
+      : 0;
+    const ratingCount = Number.isFinite(ratingCountRaw) ? Math.max(0, ratingCountRaw) : 0;
+
     const product = await ProductModel.create({
       name,
       slug,
@@ -171,8 +178,10 @@ export async function createProductAction(
       variants: [{ sku, sizeMl, price, stock, isDefault: true }],
       images: [{ publicId: uploaded.publicId, alt, width: uploaded.width, height: uploaded.height }],
       minPrice: price,
+      rating: { average: ratingAverage, count: ratingCount },
       isBestseller: formData.get("isBestseller") === "on",
       isNewArrival: formData.get("isNewArrival") === "on",
+      isComingSoon: formData.get("isComingSoon") === "on",
       status: "active",
     });
 

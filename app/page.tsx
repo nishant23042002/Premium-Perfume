@@ -3,6 +3,7 @@ import { USPStrip } from "@/components/home/USPStrip";
 import { NewArrivals } from "@/components/home/NewArrivals";
 import { CategoryShowcase } from "@/components/home/CategoryShowcase";
 import { OfferBannerSection } from "@/components/home/OfferBannerSection";
+import { ComingSoon } from "@/components/home/ComingSoon";
 import { WhyBrand } from "@/components/home/WhyBrand";
 import { WatchAndShop } from "@/components/home/WatchAndShop";
 import { Testimonials } from "@/components/home/Testimonials";
@@ -16,6 +17,7 @@ export default function Home() {
       <NewArrivals />
       <CategoryShowcase />
       <OfferBannerSection />
+      <ComingSoon />
       <WhyBrand />
       <WatchAndShop />
       <Testimonials />

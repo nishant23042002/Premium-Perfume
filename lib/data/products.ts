@@ -1,6 +1,11 @@
 import { connectToDatabase } from "@/lib/db/connect";
 import { ProductModel } from "@/models/Product";
+import { CategoryModel } from "@/models/Category";
 import { SORT_OPTIONS, type SortOption } from "@/lib/product-sort";
+
+function escapeRegExp(input: string): string {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 export { SORT_OPTIONS, type SortOption };
 
@@ -8,6 +13,7 @@ export type ProductCardData = {
   _id: string;
   name: string;
   slug: string;
+  shortDescription?: string;
   images: { publicId: string; alt: string }[];
   variants: {
     sku: string;
@@ -21,10 +27,11 @@ export type ProductCardData = {
   isBestseller: boolean;
   isNewArrival: boolean;
   isLimitedEdition: boolean;
+  isComingSoon: boolean;
 };
 
 const CARD_PROJECTION =
-  "name slug images variants rating isBestseller isNewArrival isLimitedEdition";
+  "name slug shortDescription images variants rating isBestseller isNewArrival isLimitedEdition isComingSoon";
 
 export async function getBestsellerProducts(limit = 4): Promise<ProductCardData[]> {
   await connectToDatabase();
@@ -38,6 +45,15 @@ export async function getBestsellerProducts(limit = 4): Promise<ProductCardData[
 export async function getNewArrivals(limit = 4): Promise<ProductCardData[]> {
   await connectToDatabase();
   const products = await ProductModel.find({ status: "active", isNewArrival: true }, CARD_PROJECTION)
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
+  return JSON.parse(JSON.stringify(products));
+}
+
+export async function getComingSoonProducts(limit = 4): Promise<ProductCardData[]> {
+  await connectToDatabase();
+  const products = await ProductModel.find({ status: "active", isComingSoon: true }, CARD_PROJECTION)
     .sort({ createdAt: -1 })
     .limit(limit)
     .lean();
@@ -79,7 +95,9 @@ export type ProductListParams = {
   categoryId?: string;
   productIds?: string[];
   isBestseller?: boolean;
+  isComingSoon?: boolean;
   concentrations?: string[];
+  query?: string;
   sort?: SortOption;
   page?: number;
   pageSize?: number;
@@ -100,7 +118,9 @@ export async function getProductList(params: ProductListParams): Promise<Product
     categoryId,
     productIds,
     isBestseller,
+    isComingSoon,
     concentrations,
+    query,
     sort = "newest",
     page = 1,
     pageSize = 12,
@@ -110,7 +130,24 @@ export async function getProductList(params: ProductListParams): Promise<Product
   if (categoryId) filter.categoryIds = categoryId;
   if (productIds) filter._id = { $in: productIds };
   if (isBestseller) filter.isBestseller = true;
+  if (isComingSoon) filter.isComingSoon = true;
   if (concentrations && concentrations.length > 0) filter.concentration = { $in: concentrations };
+
+  const trimmedQuery = query?.trim();
+  if (trimmedQuery) {
+    const re = new RegExp(escapeRegExp(trimmedQuery), "i");
+    const matchingCategories = await CategoryModel.find({ name: re }, "_id").lean();
+
+    const orConditions: Record<string, unknown>[] = [
+      { name: re },
+      { shortDescription: re },
+      { concentration: re },
+    ];
+    if (matchingCategories.length > 0) {
+      orConditions.push({ categoryIds: { $in: matchingCategories.map((c) => c._id) } });
+    }
+    filter.$or = orConditions;
+  }
 
   const sortSpec = SORT_MAP[sort] ?? SORT_MAP.newest;
   const skip = (page - 1) * pageSize;

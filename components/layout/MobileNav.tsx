@@ -2,11 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { NavCategory } from "@/lib/data/categories";
 
 export function MobileNav({ categories }: { categories: NavCategory[] }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  function linkClass(href: string) {
+    const isActive = pathname === href;
+    return cn(
+      "border-l-2 py-4 pl-4 font-sans text-sm uppercase tracking-[0.1em] transition-colors duration-300",
+      isActive ? "border-accent-dark text-accent-dark" : "border-transparent text-ink",
+    );
+  }
 
   return (
     <div className="lg:hidden">
@@ -28,7 +39,8 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
                 key={category._id}
                 href={`/perfumes/${category.slug}`}
                 onClick={() => setOpen(false)}
-                className="py-4 font-sans text-sm uppercase tracking-[0.1em] text-ink"
+                aria-current={pathname === `/perfumes/${category.slug}` ? "page" : undefined}
+                className={linkClass(`/perfumes/${category.slug}`)}
               >
                 {category.name}
               </Link>
@@ -36,21 +48,24 @@ export function MobileNav({ categories }: { categories: NavCategory[] }) {
             <Link
               href="/collections/bestsellers"
               onClick={() => setOpen(false)}
-              className="py-4 font-sans text-sm uppercase tracking-[0.1em] text-ink"
+              aria-current={pathname === "/collections/bestsellers" ? "page" : undefined}
+              className={linkClass("/collections/bestsellers")}
             >
               Bestsellers
             </Link>
             <Link
               href="/about"
               onClick={() => setOpen(false)}
-              className="py-4 font-sans text-sm uppercase tracking-[0.1em] text-ink"
+              aria-current={pathname === "/about" ? "page" : undefined}
+              className={linkClass("/about")}
             >
               Our Story
             </Link>
             <Link
               href="/contact"
               onClick={() => setOpen(false)}
-              className="py-4 font-sans text-sm uppercase tracking-[0.1em] text-ink"
+              aria-current={pathname === "/contact" ? "page" : undefined}
+              className={linkClass("/contact")}
             >
               Contact
             </Link>

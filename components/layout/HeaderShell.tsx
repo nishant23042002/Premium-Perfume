@@ -2,16 +2,23 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { User } from "lucide-react";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { CartTrigger } from "@/components/layout/CartTrigger";
+import { HeaderSearch } from "@/components/layout/HeaderSearch";
+import { NavLink } from "@/components/layout/NavLink";
 import { AnnouncementRotator } from "@/components/layout/AnnouncementRotator";
 import { Container } from "@/components/ui/Container";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/site";
+import { getCloudinaryUrl } from "@/lib/cloudinary";
 import { useAuthModal } from "@/lib/auth-modal-context";
 import type { NavCategory } from "@/lib/data/categories";
 import type { ActiveAnnouncement } from "@/lib/data/announcements";
+import type { SiteLogo } from "@/lib/data/siteSettings";
+import type { CategoryShowcaseCard } from "@/lib/data/categoryShowcase";
+import type { ProductCardData } from "@/lib/data/products";
 
 // Collapses the announcement row out of view once the page has scrolled
 // past this point, then brings it back when scrolling back up to the top.
@@ -21,10 +28,16 @@ export function HeaderShell({
   categories,
   announcements,
   isLoggedIn,
+  logo,
+  categoryShowcase,
+  featuredProducts,
 }: {
   categories: NavCategory[];
   announcements: ActiveAnnouncement[];
   isLoggedIn: boolean;
+  logo: SiteLogo | null;
+  categoryShowcase: CategoryShowcaseCard[];
+  featuredProducts: ProductCardData[];
 }) {
   const [scrolled, setScrolled] = useState(false);
   const { openLogin } = useAuthModal();
@@ -37,9 +50,6 @@ export function HeaderShell({
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const navLinkClass =
-    "font-sans text-xs font-medium uppercase tracking-[0.15em] text-ink/80 transition-colors duration-300 hover:text-accent-dark";
 
   const iconClass = "text-ink transition-colors duration-300 hover:text-accent-dark";
 
@@ -61,28 +71,39 @@ export function HeaderShell({
       <Container className="flex h-20 items-center justify-between gap-4">
         <MobileNav categories={categories} />
 
-        <Link href="/" className="font-display text-2xl text-secondary transition-colors duration-300">
-          {siteConfig.name}
-        </Link>
+        {logo ? (
+          <Link href="/" className="shrink-0" aria-label={siteConfig.name}>
+            <Image
+              src={getCloudinaryUrl(logo.publicId, { height: 160 }) ?? ""}
+              alt={logo.alt}
+              width={logo.width ?? 400}
+              height={logo.height ?? 120}
+              priority
+              className="h-8 w-auto max-w-[140px] object-contain sm:h-10 sm:max-w-[180px]"
+            />
+          </Link>
+        ) : (
+          <Link
+            href="/"
+            className="min-w-0 shrink truncate font-display text-base text-secondary transition-colors duration-300 sm:text-xl md:text-2xl"
+          >
+            {siteConfig.name}
+          </Link>
+        )}
 
         <nav className="hidden items-center gap-8 lg:flex">
           {categories.map((category) => (
-            <Link key={category._id} href={`/perfumes/${category.slug}`} className={navLinkClass}>
+            <NavLink key={category._id} href={`/perfumes/${category.slug}`}>
               {category.name}
-            </Link>
+            </NavLink>
           ))}
-          <Link href="/collections/bestsellers" className={navLinkClass}>
-            Bestsellers
-          </Link>
-          <Link href="/about" className={navLinkClass}>
-            Our Story
-          </Link>
-          <Link href="/contact" className={navLinkClass}>
-            Contact
-          </Link>
+          <NavLink href="/collections/bestsellers">Bestsellers</NavLink>
+          <NavLink href="/about">Our Story</NavLink>
+          <NavLink href="/contact">Contact</NavLink>
         </nav>
 
         <div className="flex items-center gap-5">
+          <HeaderSearch categoryShowcase={categoryShowcase} featuredProducts={featuredProducts} />
           {isLoggedIn ? (
             <Link href="/account" aria-label="Account" className={iconClass}>
               <User className="h-5 w-5" strokeWidth={1.5} />

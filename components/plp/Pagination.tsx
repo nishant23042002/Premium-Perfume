@@ -8,7 +8,7 @@ export function Pagination({
   totalPages,
 }: {
   pathname: string;
-  searchParams: { sort?: string; concentration?: string };
+  searchParams: { sort?: string; concentration?: string; q?: string; comingSoon?: string };
   page: number;
   totalPages: number;
 }) {
@@ -18,6 +18,8 @@ export function Pagination({
     const params = new URLSearchParams();
     if (searchParams.sort) params.set("sort", searchParams.sort);
     if (searchParams.concentration) params.set("concentration", searchParams.concentration);
+    if (searchParams.q) params.set("q", searchParams.q);
+    if (searchParams.comingSoon) params.set("comingSoon", searchParams.comingSoon);
     if (targetPage > 1) params.set("page", String(targetPage));
     const qs = params.toString();
     return qs ? `${pathname}?${qs}` : pathname;

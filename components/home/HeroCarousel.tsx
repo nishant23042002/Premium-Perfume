@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/Container";
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
 import { siteConfig } from "@/lib/site";
@@ -48,7 +49,7 @@ export function HeroCarousel({ slides }: { slides: ActiveBanner[] }) {
       // phones, matching the admin's recommended upload ratio on desktop)
       // instead of stretching a fixed-height box across whatever width the
       // screen happens to be.
-      className="relative flex aspect-[4/5] max-h-[720px] flex-col items-stretch justify-start overflow-hidden bg-ivory sm:aspect-[3/2] sm:justify-center lg:aspect-[2/1]"
+      className="relative flex aspect-[4/5] max-h-[720px] flex-col items-stretch justify-start overflow-hidden bg-ivory sm:aspect-[3/2] sm:justify-center lg:aspect-[21/9]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -103,20 +104,31 @@ export function HeroCarousel({ slides }: { slides: ActiveBanner[] }) {
         className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/15 to-transparent sm:bg-gradient-to-r sm:from-ink/50 sm:via-ink/10 sm:to-transparent"
       />
 
-      <Container className="relative z-[1] flex flex-1 flex-col justify-start pt-10 pb-8 sm:flex-none sm:justify-center sm:py-0">
-        <div className="mx-auto flex max-w-xs flex-col items-center text-center sm:mx-0 sm:max-w-md sm:items-start sm:text-left">
+      <Container className="relative z-[1] flex flex-1 flex-col justify-start pt-6 pb-8 sm:flex-none sm:justify-center sm:py-0">
+        <div className="mx-auto flex max-w-[13rem] flex-col items-center text-center sm:mx-0 sm:max-w-md sm:items-start sm:text-left">
           <span
             key={`subtitle-${active._id}`}
-            className="animate-fade-in text-shadow-banner font-sans text-xs uppercase tracking-[0.35em] text-ivory"
+            className="animate-fade-in text-shadow-banner font-sans text-[10px] uppercase tracking-[0.2em] text-ivory sm:text-xs sm:tracking-[0.35em]"
           >
             {active.subtitle || "Crafted in small batches"}
           </span>
           <h1
             key={`title-${active._id}`}
-            className="animate-fade-in text-shadow-banner mt-3 font-display text-4xl leading-tight text-ivory sm:text-5xl"
+            className="animate-fade-in text-shadow-banner mt-1.5 font-display text-2xl leading-tight text-ivory sm:mt-3 sm:text-5xl"
           >
             {active.title || siteConfig.tagline}
           </h1>
+          {active.linkHref && (
+            <Button
+              key={`cta-${active._id}`}
+              href={active.linkHref}
+              variant="primary"
+              size="sm"
+              className="animate-fade-in mt-3 sm:mt-5"
+            >
+              Shop Now
+            </Button>
+          )}
         </div>
       </Container>
 

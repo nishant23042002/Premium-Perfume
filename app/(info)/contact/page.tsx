@@ -8,15 +8,15 @@ import { ContactForm } from "@/components/contact/ContactForm";
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
-    "Get in touch with the Vellora team for order support, product questions, or general enquiries.",
+    "Get in touch with the THE RARESKIN team for order support, product questions, or general enquiries.",
 };
 
 const contactDetails = [
   {
     icon: Mail,
     label: "Email",
-    value: "support@vellora.in",
-    href: "mailto:support@vellora.in",
+    value: "support@therareskin.in",
+    href: "mailto:support@therareskin.in",
   },
   {
     icon: Phone,

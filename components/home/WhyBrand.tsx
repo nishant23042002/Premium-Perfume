@@ -24,6 +24,7 @@ export function WhyBrand() {
     <Section tone="ivory-2">
       <Container className="grid gap-12 lg:grid-cols-2 lg:items-center">
         <div className="flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-ivory to-secondary/10">
+          
           <FlaskConical className="h-16 w-16 text-secondary/25" strokeWidth={1} />
         </div>
 

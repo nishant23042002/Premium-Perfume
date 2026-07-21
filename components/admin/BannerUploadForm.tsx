@@ -22,7 +22,11 @@ export function BannerUploadForm() {
       <div className="grid gap-3 sm:grid-cols-2">
         <input name="title" placeholder="Title (optional)" className={inputClass} />
         <input name="subtitle" placeholder="Subtitle (optional)" className={inputClass} />
-        <input name="linkHref" placeholder="Link URL (optional)" className={inputClass} />
+        <input
+          name="linkHref"
+          placeholder="Link URL (optional — e.g. /product/aurevan)"
+          className={inputClass}
+        />
         <input
           name="alt"
           required
