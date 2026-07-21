@@ -1,6 +1,8 @@
 import { Hero } from "@/components/home/Hero";
 import { USPStrip } from "@/components/home/USPStrip";
-import { BestSellers } from "@/components/home/BestSellers";
+import { NewArrivals } from "@/components/home/NewArrivals";
+import { CategoryShowcase } from "@/components/home/CategoryShowcase";
+import { OfferBannerSection } from "@/components/home/OfferBannerSection";
 import { WhyBrand } from "@/components/home/WhyBrand";
 import { WatchAndShop } from "@/components/home/WatchAndShop";
 import { Testimonials } from "@/components/home/Testimonials";
@@ -11,7 +13,9 @@ export default function Home() {
     <>
       <Hero />
       <USPStrip />
-      <BestSellers />
+      <NewArrivals />
+      <CategoryShowcase />
+      <OfferBannerSection />
       <WhyBrand />
       <WatchAndShop />
       <Testimonials />

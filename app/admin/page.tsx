@@ -4,17 +4,25 @@ import { BannerList } from "@/components/admin/BannerList";
 import { CreateProductForm } from "@/components/admin/CreateProductForm";
 import { ProductImageUploadForm } from "@/components/admin/ProductImageUploadForm";
 import { ProductImageList } from "@/components/admin/ProductImageList";
+import { CategoryShowcaseForm } from "@/components/admin/CategoryShowcaseForm";
+import { CategoryShowcaseList } from "@/components/admin/CategoryShowcaseList";
+import { OfferBannerForm } from "@/components/admin/OfferBannerForm";
+import { OfferBannerList } from "@/components/admin/OfferBannerList";
 import { getAllBanners } from "@/lib/data/banners";
 import { getProductsForAdmin } from "@/lib/data/products";
 import { getNavCategories } from "@/lib/data/categories";
+import { getAllCategoryShowcase } from "@/lib/data/categoryShowcase";
+import { getAllOfferBanners } from "@/lib/data/offerBanners";
 
 export const metadata: Metadata = { title: "Admin", robots: { index: false, follow: false } };
 
 export default async function AdminPage() {
-  const [banners, products, categories] = await Promise.all([
+  const [banners, products, categories, categoryShowcase, offerBanners] = await Promise.all([
     getAllBanners(),
     getProductsForAdmin(),
     getNavCategories(),
+    getAllCategoryShowcase(),
+    getAllOfferBanners(),
   ]);
 
   return (
@@ -40,6 +48,18 @@ export default async function AdminPage() {
           <CreateProductForm categories={categories} />
           <ProductImageUploadForm products={products} />
           <ProductImageList products={products} />
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold">Shop by Category (Homepage)</h2>
+          <CategoryShowcaseForm />
+          <CategoryShowcaseList cards={categoryShowcase} />
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold">Offer Banners (Homepage)</h2>
+          <OfferBannerForm />
+          <OfferBannerList banners={offerBanners} />
         </section>
       </div>
     </div>
