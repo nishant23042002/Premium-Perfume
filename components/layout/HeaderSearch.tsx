@@ -130,11 +130,17 @@ export function HeaderSearch({
 
         <div
           className={cn(
-            // Mobile: unchanged full-width panel pinned to the top. Desktop:
-            // no longer a centered wide dialog — a narrower panel that drops
-            // down from just below the header, right-aligned under the
-            // search icon instead of floating in the middle of the screen.
-            "absolute inset-x-0 top-0 flex max-h-[85vh] w-full flex-col overflow-hidden bg-ivory shadow-2xl transition-all duration-300 sm:inset-x-auto sm:right-8 sm:top-20 sm:w-full sm:max-w-md lg:right-12",
+            // Mobile: full-width panel pinned to the top. Desktop: the same
+            // wide dialog as before, just anchored to drop down from
+            // top-right under the search icon instead of centering itself
+            // in the middle of the screen. The width is capped with min() —
+            // not a flat max-w-5xl — because this box is positioned via
+            // `right` with no `left`, so a flat max-width that's wider than
+            // (viewport - right offset) makes it overflow past the left
+            // edge on anything narrower than ~1070px (tablets included). The
+            // min() keeps it inside the viewport at every width and only
+            // reaches the full 5xl (1024px) cap once there's room to spare.
+            "absolute inset-x-0 top-0 flex max-h-[85vh] w-full flex-col overflow-hidden bg-ivory shadow-2xl transition-all duration-300 sm:inset-x-auto sm:right-8 sm:top-20 sm:w-[min(calc(100%-4rem),64rem)] lg:right-12 lg:w-[min(calc(100%-6rem),64rem)]",
             isOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0",
           )}
         >
@@ -161,28 +167,26 @@ export function HeaderSearch({
             </button>
           </form>
 
-          <div className="flex flex-1 flex-col overflow-hidden" onClick={handleClickInside}>
-            {/* Category strip — reuses the same images/links as the homepage
-                "Shop by Category" section. Now that this panel is a narrow
-                dropdown rather than a wide dialog, it stays a horizontal
-                scroll strip at every width instead of switching to a left
-                column, which would be cramped at this size. */}
+          <div className="flex flex-1 flex-col overflow-hidden sm:flex-row" onClick={handleClickInside}>
+            {/* Category sidebar — reuses the same images/links as the
+                homepage "Shop by Category" section. A horizontal scroll
+                strip on mobile, a proper left column from sm: up. */}
             {categoryShowcase.length > 0 && (
-              <div className="scrollbar-none flex shrink-0 gap-3 overflow-x-auto border-b border-ink/10 p-4">
+              <div className="scrollbar-none flex shrink-0 gap-3 overflow-x-auto border-b border-ink/10 p-4 sm:w-36 sm:flex-col sm:overflow-y-auto sm:border-b-0 sm:border-r sm:p-4">
                 {categoryShowcase.map((card) => (
                   <Link
                     key={card._id}
                     href={card.linkHref}
-                    className="group flex shrink-0 flex-col items-center gap-2"
+                    className="group flex shrink-0 flex-col items-center gap-2 sm:shrink"
                   >
-                    <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-ivory-2">
+                    <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-ivory-2 sm:h-20 sm:w-full">
                       <ProductImage
                         publicId={card.image.publicId}
                         alt={card.image.alt}
                         className="h-full w-full transition-transform duration-300 group-hover:scale-105"
                       />
                     </div>
-                    <span className="whitespace-nowrap font-sans text-[11px] uppercase tracking-wide text-ink/70 transition-colors group-hover:text-accent-dark">
+                    <span className="whitespace-nowrap font-sans text-[11px] uppercase tracking-wide text-ink/70 transition-colors group-hover:text-accent-dark sm:whitespace-normal sm:text-center">
                       {card.title}
                     </span>
                   </Link>
@@ -224,7 +228,7 @@ export function HeaderSearch({
                       Popular Picks
                     </span>
                   )}
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-6">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
                     {productGrid.map((product) => (
                       <SearchProductCard key={product._id} product={product} />
                     ))}
