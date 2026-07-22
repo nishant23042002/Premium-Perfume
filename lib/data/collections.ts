@@ -17,3 +17,27 @@ export async function getCollectionBySlug(slug: string): Promise<CollectionDetai
   ).lean();
   return collection ? JSON.parse(JSON.stringify(collection)) : null;
 }
+
+export type AdminCollection = {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  image?: { publicId: string; alt?: string };
+  productCount: number;
+  isFeatured: boolean;
+};
+
+export async function getAllCollectionsForAdmin(): Promise<AdminCollection[]> {
+  await connectToDatabase();
+  const collections = await CollectionModel.find({}).sort({ createdAt: -1 }).lean();
+  return collections.map((c) => ({
+    id: String(c._id),
+    name: c.name,
+    slug: c.slug,
+    description: c.description,
+    image: c.image?.publicId ? { publicId: c.image.publicId, alt: c.image.alt } : undefined,
+    productCount: c.productIds?.length ?? 0,
+    isFeatured: c.isFeatured,
+  }));
+}

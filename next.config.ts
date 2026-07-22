@@ -11,11 +11,12 @@ const nextConfig: NextConfig = {
       // can post both a desktop and mobile image in one request.
       bodySizeLimit: "25mb",
     },
-    // proxy.ts gates /admin/:path* behind Basic Auth, which makes Next.js
-    // clone/buffer every proxied request body (silently truncated past this
-    // limit) — separate from serverActions.bodySizeLimit above. Must be at
-    // least as large or large uploads get truncated before reaching the
-    // Server Action, surfacing as a cryptic "Unexpected end of form" error.
+    // proxy.ts matches /admin/:path*, which makes Next.js clone/buffer every
+    // proxied request body (silently truncated past this limit) regardless
+    // of what the proxy itself does — separate from serverActions.bodySizeLimit
+    // above. Must be at least as large or large uploads get truncated before
+    // reaching the Server Action, surfacing as a cryptic "Unexpected end of
+    // form" error.
     proxyClientMaxBodySize: "25mb",
   },
   images: {
@@ -25,6 +26,50 @@ const nextConfig: NextConfig = {
         hostname: "res.cloudinary.com",
       },
     ],
+  },
+  async headers() {
+    const commonHeaders = [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "X-Frame-Options", value: "DENY" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+    ];
+
+    // CSP is production-only: Turbopack's dev runtime relies on patterns
+    // (eval-based HMR, inline bootstrap) that a strict policy would break,
+    // and dev builds never see real traffic anyway. `unsafe-inline` on
+    // script-src is a known relaxation for Next's own inline bootstrap data —
+    // tighten with nonces in a later hardening pass.
+    if (process.env.NODE_ENV !== "production") {
+      return [{ source: "/:path*", headers: commonHeaders }];
+    }
+
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.google.com https://apis.google.com https://checkout.razorpay.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https://res.cloudinary.com https://www.gstatic.com https://www.google.com https://*.razorpay.com",
+      "font-src 'self' data:",
+      "connect-src 'self' https://*.googleapis.com https://*.razorpay.com",
+      "frame-src 'self' https://www.google.com https://*.firebaseapp.com https://api.razorpay.com https://checkout.razorpay.com",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; ");
+
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          ...commonHeaders,
+          { key: "Content-Security-Policy", value: csp },
+          // Browsers ignore this over plain HTTP, so it's harmless in any
+          // non-HTTPS environment — kept here rather than in commonHeaders
+          // purely because it's meaningless outside of production anyway.
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+        ],
+      },
+    ];
   },
 };
 

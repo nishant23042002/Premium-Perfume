@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Price } from "@/components/ui/Price";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
+import { useCheckoutModal } from "@/lib/checkout-modal-context";
 import { CartDrawerLineItem } from "@/components/cart/CartDrawerLineItem";
 import { CartRecommendations } from "@/components/cart/CartRecommendations";
 
@@ -12,6 +13,7 @@ const FREE_SHIPPING_THRESHOLD = 999;
 
 export function CartDrawer() {
   const { cart, isOpen, closeCart } = useCart();
+  const { openCheckout } = useCheckoutModal();
   const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - cart.subtotal);
 
   return (
@@ -88,7 +90,16 @@ export function CartDrawer() {
               <span className="text-ink/60">Subtotal</span>
               <Price value={cart.subtotal} className="text-base font-semibold" />
             </div>
-            <Button href="/checkout" variant="primary" size="lg" className="w-full" onClick={closeCart}>
+            <Button
+              type="button"
+              variant="primary"
+              size="lg"
+              className="w-full"
+              onClick={() => {
+                closeCart();
+                openCheckout();
+              }}
+            >
               Proceed to Checkout
             </Button>
           </div>

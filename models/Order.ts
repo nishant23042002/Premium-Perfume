@@ -34,6 +34,11 @@ const orderSchema = new Schema(
 
     items: { type: [orderItemSchema], required: true },
 
+    // Optional — collected at checkout solely so we have somewhere to send
+    // the order confirmation email. Not required, since phone is already
+    // the primary contact channel for this store.
+    email: { type: String },
+
     shippingAddress: { type: addressSchema, required: true },
     billingAddress: { type: addressSchema },
 
@@ -49,8 +54,6 @@ const orderSchema = new Schema(
       default: "pending",
     },
 
-    // Payment-ready: no gateway wired up yet. `provider` stays null until
-    // Razorpay/Stripe (or COD) is selected at checkout in a later phase.
     payment: {
       provider: { type: String, enum: ["cod", "razorpay", "stripe", null], default: null },
       status: {
@@ -58,6 +61,10 @@ const orderSchema = new Schema(
         enum: ["pending", "paid", "failed", "refunded"],
         default: "pending",
       },
+      // Set when a Razorpay order is created at checkout, before payment
+      // completes — used to match the client's verification callback (and
+      // the webhook) back to this order.
+      razorpayOrderId: { type: String, index: true },
       transactionId: { type: String },
       paidAt: { type: Date },
     },

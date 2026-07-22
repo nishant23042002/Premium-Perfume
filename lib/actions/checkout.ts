@@ -7,10 +7,23 @@ import { connectToDatabase } from "@/lib/db/connect";
 import { CartModel } from "@/models/Cart";
 import { ProductModel } from "@/models/Product";
 import { OrderModel } from "@/models/Order";
+import { CouponModel } from "@/models/Coupon";
 import { getCartSessionId } from "@/lib/cart-session";
 import { getSession } from "@/lib/auth-session";
+import { saveAddressFromOrder } from "@/lib/data/users";
+import { getRazorpayClient, verifyPaymentSignature } from "@/lib/razorpay";
+import { decrementStock, restockItem } from "@/lib/inventory";
+import { sendOrderConfirmationEmail } from "@/lib/email";
 
-export type CheckoutState = { error?: string };
+const PAYMENT_LABEL: Record<string, string> = {
+  cod: "Cash on Delivery",
+  razorpay: "Paid Online (Razorpay)",
+};
+
+export type CheckoutState = {
+  error?: string;
+  razorpay?: { orderId: string; amountPaise: number; keyId: string; orderNumber: string };
+};
 
 const REQUIRED_FIELDS = ["fullName", "phone", "line1", "city", "state", "pincode"] as const;
 const FREE_SHIPPING_THRESHOLD = 999;
@@ -30,13 +43,99 @@ type LeanProductForOrder = {
   variants: { sku: string; sizeMl: number }[];
 };
 
-export async function placeOrder(
-  _prevState: CheckoutState,
+type AppliedCoupon = { code: string; discount: number };
+
+/** Validates a coupon against the current order (specific, friendly error
+ * messages), then atomically claims one use — the usage-limit check is
+ * re-verified inside the same update so two customers racing for the last
+ * redemption of a limited code can't both win. */
+async function applyCoupon(
+  rawCode: string,
+  subtotal: number,
+): Promise<{ ok: true; coupon: AppliedCoupon } | { ok: false; error: string }> {
+  const code = rawCode.trim().toUpperCase();
+  const coupon = await CouponModel.findOne({ code });
+
+  if (!coupon || !coupon.isActive) return { ok: false, error: "That coupon code isn't valid." };
+  if (coupon.expiresAt && coupon.expiresAt.getTime() < Date.now()) {
+    return { ok: false, error: "That coupon code has expired." };
+  }
+  if (coupon.minOrderValue && subtotal < coupon.minOrderValue) {
+    return { ok: false, error: `This code needs a minimum order of ₹${coupon.minOrderValue}.` };
+  }
+
+  const claimed = await CouponModel.findOneAndUpdate(
+    {
+      _id: coupon._id,
+      $expr: {
+        $or: [
+          // A missing usageLimit field is NOT the same as an explicit null
+          // to $expr's strict $eq — $ifNull normalizes "field absent" to
+          // null so uncapped coupons (no usageLimit set at all) match here.
+          { $eq: [{ $ifNull: ["$usageLimit", null] }, null] },
+          { $lt: ["$usedCount", "$usageLimit"] },
+        ],
+      },
+    },
+    { $inc: { usedCount: 1 } },
+    { returnDocument: "after" },
+  );
+  if (!claimed) return { ok: false, error: "This coupon code just reached its usage limit." };
+
+  let discount = coupon.type === "percentage" ? Math.round((subtotal * coupon.value) / 100) : coupon.value;
+  if (coupon.maxDiscount) discount = Math.min(discount, coupon.maxDiscount);
+  discount = Math.min(discount, subtotal);
+
+  return { ok: true, coupon: { code, discount } };
+}
+
+async function releaseCoupon(code: string): Promise<void> {
+  await CouponModel.updateOne({ code }, { $inc: { usedCount: -1 } });
+}
+
+type ShippingAddress = {
+  fullName: string;
+  phone: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  country: string;
+};
+
+type PreparedOrder = {
+  orderItems: {
+    productId: Types.ObjectId;
+    sku: string;
+    name: string;
+    image?: string;
+    sizeMl: number;
+    price: number;
+    quantity: number;
+  }[];
+  subtotal: number;
+  shippingFee: number;
+  discount: number;
+  couponCode?: string;
+  total: number;
+  shippingAddress: ShippingAddress;
+  email?: string;
+  orderNumber: string;
+  userId?: string;
+};
+
+/** Shared setup for both payment paths: validates the form, reads the cart,
+ * applies a coupon if given, and atomically claims stock for every line
+ * item — rolling back anything already claimed (and the coupon) the moment
+ * one item can't be fulfilled. Returns the fully-priced order, ready to be
+ * persisted by whichever payment path calls it. */
+async function prepareOrder(
   formData: FormData,
-): Promise<CheckoutState> {
+): Promise<{ ok: true; order: PreparedOrder } | { ok: false; error: string }> {
   for (const field of REQUIRED_FIELDS) {
     if (!String(formData.get(field) ?? "").trim()) {
-      return { error: `Please fill in all required fields.` };
+      return { ok: false, error: "Please fill in all required fields." };
     }
   }
 
@@ -44,12 +143,12 @@ export async function placeOrder(
 
   const sessionId = await getCartSessionId();
   if (!sessionId) {
-    return { error: "Your cart session has expired. Please add items to your bag again." };
+    return { ok: false, error: "Your cart session has expired. Please add items to your bag again." };
   }
 
   const cart = await CartModel.findOne({ sessionId });
   if (!cart || cart.items.length === 0) {
-    return { error: "Your bag is empty." };
+    return { ok: false, error: "Your bag is empty." };
   }
 
   const cartItems: CartItemLike[] = cart.items;
@@ -75,10 +174,31 @@ export async function placeOrder(
   });
 
   const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
-  const total = subtotal + shippingFee;
 
-  const shippingAddress = {
+  const couponCode = String(formData.get("couponCode") ?? "").trim();
+  let appliedCoupon: AppliedCoupon | null = null;
+  if (couponCode) {
+    const result = await applyCoupon(couponCode, subtotal);
+    if (!result.ok) return { ok: false, error: result.error };
+    appliedCoupon = result.coupon;
+  }
+
+  const claimed: { productId: Types.ObjectId; sku: string; quantity: number }[] = [];
+  for (const item of orderItems) {
+    const ok = await decrementStock(item.productId, item.sku, item.quantity);
+    if (!ok) {
+      for (const claim of claimed) await restockItem(claim.productId, claim.sku, claim.quantity);
+      if (appliedCoupon) await releaseCoupon(appliedCoupon.code);
+      return { ok: false, error: `Sorry, "${item.name}" just sold out. Please update your bag and try again.` };
+    }
+    claimed.push({ productId: item.productId, sku: item.sku, quantity: item.quantity });
+  }
+
+  const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  const discount = appliedCoupon?.discount ?? 0;
+  const total = subtotal + shippingFee - discount;
+
+  const shippingAddress: ShippingAddress = {
     fullName: String(formData.get("fullName")),
     phone: String(formData.get("phone")),
     line1: String(formData.get("line1")),
@@ -89,25 +209,211 @@ export async function placeOrder(
     country: "India",
   };
 
-  const orderNumber = `VEL-${Date.now().toString(36).toUpperCase()}`;
+  const orderNumber = `RSK-${Date.now().toString(36).toUpperCase()}`;
   const session = await getSession();
+  const email = String(formData.get("email") ?? "").trim() || undefined;
 
-  const order = await OrderModel.create({
-    orderNumber,
-    userId: session?.userId,
-    items: orderItems,
-    shippingAddress,
-    subtotal,
-    shippingFee,
-    discount: 0,
-    total,
+  return {
+    ok: true,
+    order: {
+      orderItems,
+      subtotal,
+      shippingFee,
+      discount,
+      couponCode: appliedCoupon?.code,
+      total,
+      shippingAddress,
+      email,
+      orderNumber,
+      userId: session?.userId,
+    },
+  };
+}
+
+async function rollbackPreparedOrder(order: PreparedOrder): Promise<void> {
+  for (const item of order.orderItems) await restockItem(item.productId, item.sku, item.quantity);
+  if (order.couponCode) await releaseCoupon(order.couponCode);
+}
+
+export async function placeOrder(
+  _prevState: CheckoutState,
+  formData: FormData,
+): Promise<CheckoutState> {
+  const prepared = await prepareOrder(formData);
+  if (!prepared.ok) return { error: prepared.error };
+  const { order } = prepared;
+
+  const paymentMethod = String(formData.get("payment") ?? "cod");
+
+  if (paymentMethod === "razorpay") {
+    try {
+      const razorpay = getRazorpayClient();
+      const amountPaise = Math.round(order.total * 100);
+      const razorpayOrder = await razorpay.orders.create({
+        amount: amountPaise,
+        currency: "INR",
+        receipt: order.orderNumber,
+      });
+
+      await OrderModel.create({
+        orderNumber: order.orderNumber,
+        userId: order.userId,
+        items: order.orderItems,
+        email: order.email,
+        shippingAddress: order.shippingAddress,
+        subtotal: order.subtotal,
+        shippingFee: order.shippingFee,
+        discount: order.discount,
+        couponCode: order.couponCode,
+        total: order.total,
+        // Stays "pending" until Razorpay confirms payment — the cart is
+        // deliberately NOT cleared yet, so an abandoned/failed payment
+        // leaves the customer able to check out again. Stock and the
+        // coupon use are already claimed at this point, though; if the
+        // payment is never completed, cancelPendingOrder() (wired to the
+        // Checkout widget's dismiss handler) releases them.
+        status: "pending",
+        payment: { provider: "razorpay", status: "pending", razorpayOrderId: razorpayOrder.id },
+      });
+
+      return {
+        razorpay: {
+          orderId: razorpayOrder.id,
+          amountPaise,
+          keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "",
+          orderNumber: order.orderNumber,
+        },
+      };
+    } catch (error) {
+      await rollbackPreparedOrder(order);
+      return {
+        error:
+          error instanceof Error
+            ? `Couldn't start the payment: ${error.message}`
+            : "Couldn't start the payment. Please try again.",
+      };
+    }
+  }
+
+  // Cash on Delivery — finalize immediately.
+  await OrderModel.create({
+    orderNumber: order.orderNumber,
+    userId: order.userId,
+    items: order.orderItems,
+    email: order.email,
+    shippingAddress: order.shippingAddress,
+    subtotal: order.subtotal,
+    shippingFee: order.shippingFee,
+    discount: order.discount,
+    couponCode: order.couponCode,
+    total: order.total,
     status: "confirmed",
     payment: { provider: "cod", status: "pending" },
   });
 
-  cart.items = [];
-  await cart.save();
+  const sessionId = await getCartSessionId();
+  await CartModel.updateOne({ sessionId }, { items: [] });
+
+  if (order.email) {
+    await sendOrderConfirmationEmail({
+      to: order.email,
+      orderNumber: order.orderNumber,
+      items: order.orderItems,
+      shippingFee: order.shippingFee,
+      discount: order.discount,
+      total: order.total,
+      paymentLabel: PAYMENT_LABEL.cod,
+      shippingAddress: order.shippingAddress,
+    });
+  }
+
+  if (order.userId) await saveAddressFromOrder(order.userId, order.shippingAddress, order.email);
 
   revalidatePath("/", "layout");
-  redirect(`/checkout/confirmation/${order.orderNumber}`);
+  redirect(
+    order.userId
+      ? `/account?tab=orders&placed=${order.orderNumber}`
+      : `/checkout/confirmation/${order.orderNumber}`,
+  );
+}
+
+export type VerifyPaymentState = { error?: string };
+
+/** Called client-side right after Razorpay's Checkout widget reports
+ * success. Verifying the signature here (rather than trusting the client)
+ * is what actually proves the payment happened — the webhook in
+ * app/api/webhooks/razorpay/route.ts is a defensive backstop in case this
+ * call never fires (e.g. the tab closes right after paying). */
+export async function verifyRazorpayPayment(params: {
+  orderNumber: string;
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+}): Promise<VerifyPaymentState> {
+  const { orderNumber, razorpayOrderId, razorpayPaymentId, razorpaySignature } = params;
+
+  const isValid = verifyPaymentSignature(razorpayOrderId, razorpayPaymentId, razorpaySignature);
+  if (!isValid) return { error: "Payment verification failed. Please contact support before retrying." };
+
+  await connectToDatabase();
+  const order = await OrderModel.findOne({ orderNumber, "payment.razorpayOrderId": razorpayOrderId });
+  if (!order) return { error: "Couldn't find that order." };
+
+  if (order.payment.status !== "paid") {
+    order.payment.status = "paid";
+    order.payment.transactionId = razorpayPaymentId;
+    order.payment.paidAt = new Date();
+    order.status = "confirmed";
+    await order.save();
+
+    // Inside this guard so the webhook (a defensive backstop for this same
+    // transition — see app/api/webhooks/razorpay/route.ts) can't send a
+    // second copy if it arrives after this call already confirmed the order.
+    if (order.email) {
+      await sendOrderConfirmationEmail({
+        to: order.email,
+        orderNumber: order.orderNumber,
+        items: order.items,
+        shippingFee: order.shippingFee,
+        discount: order.discount,
+        total: order.total,
+        paymentLabel: PAYMENT_LABEL.razorpay,
+        shippingAddress: order.shippingAddress,
+      });
+    }
+  }
+
+  const sessionId = await getCartSessionId();
+  if (sessionId) await CartModel.updateOne({ sessionId }, { items: [] });
+
+  if (order.userId) {
+    await saveAddressFromOrder(String(order.userId), order.shippingAddress, order.email ?? undefined);
+  }
+
+  revalidatePath("/", "layout");
+  redirect(
+    order.userId ? `/account?tab=orders&placed=${orderNumber}` : `/checkout/confirmation/${orderNumber}`,
+  );
+}
+
+/** Releases a pending Razorpay order's reserved stock and coupon use —
+ * called when the customer dismisses the Checkout widget without paying,
+ * so retrying checkout doesn't leave inventory double-reserved. */
+export async function cancelPendingOrder(orderNumber: string): Promise<void> {
+  await connectToDatabase();
+  const order = await OrderModel.findOne({
+    orderNumber,
+    status: "pending",
+    "payment.provider": "razorpay",
+    "payment.status": "pending",
+  });
+  if (!order) return;
+
+  for (const item of order.items) {
+    await restockItem(item.productId, item.sku, item.quantity);
+  }
+  if (order.couponCode) await releaseCoupon(order.couponCode);
+
+  order.status = "cancelled";
+  await order.save();
 }

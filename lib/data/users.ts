@@ -74,3 +74,81 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
   return toCurrentUser(user);
 }
+
+type OrderAddressInput = {
+  fullName: string;
+  phone: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+};
+
+/** Saves the address used on a just-placed order back to the customer's
+ * profile, marked as their default, so it's offered pre-filled on their next
+ * checkout instead of an empty form. Matches against an existing saved
+ * address by line1 + pincode so re-ordering to the same place updates that
+ * entry in place rather than piling up duplicates. Also backfills the
+ * customer's own name/email from the checkout details the first time either
+ * is missing — customers only ever type those into the checkout form, never
+ * into a dedicated "profile" field, so without this the account page would
+ * stay blank forever. Never overwrites a value the customer already set. */
+export async function saveAddressFromOrder(
+  userId: string,
+  address: OrderAddressInput,
+  email?: string,
+): Promise<void> {
+  await connectToDatabase();
+
+  const user = await UserModel.findById(userId, "addresses name email").lean<{
+    addresses: { _id: Types.ObjectId; line1: string; pincode: string }[];
+    name?: string;
+    email?: string;
+  } | null>();
+  if (!user) return;
+
+  const profileBackfill: Record<string, string> = {};
+  if (!user.name && address.fullName) profileBackfill.name = address.fullName;
+  if (!user.email && email) profileBackfill.email = email;
+
+  const normalizedLine1 = address.line1.trim().toLowerCase();
+  const normalizedPincode = address.pincode.trim();
+  const match = user.addresses.find(
+    (a) => a.line1.trim().toLowerCase() === normalizedLine1 && a.pincode.trim() === normalizedPincode,
+  );
+
+  await UserModel.updateOne({ _id: userId }, { $set: { "addresses.$[].isDefault": false } });
+
+  if (match) {
+    await UserModel.updateOne(
+      { _id: userId, "addresses._id": match._id },
+      {
+        $set: {
+          "addresses.$.fullName": address.fullName,
+          "addresses.$.phone": address.phone,
+          "addresses.$.line2": address.line2,
+          "addresses.$.city": address.city,
+          "addresses.$.state": address.state,
+          "addresses.$.isDefault": true,
+          ...profileBackfill,
+        },
+      },
+    );
+  } else {
+    await UserModel.updateOne(
+      { _id: userId },
+      {
+        $push: {
+          addresses: {
+            label: user.addresses.length === 0 ? "Home" : "Address",
+            ...address,
+            country: "India",
+            isDefault: true,
+          },
+        },
+        ...(Object.keys(profileBackfill).length > 0 && { $set: profileBackfill }),
+      },
+    );
+  }
+}

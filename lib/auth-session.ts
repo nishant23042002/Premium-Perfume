@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
-const SESSION_COOKIE = "vellora_session";
+export const SESSION_COOKIE = "vellora_session";
 const THIRTY_DAYS = 60 * 60 * 24 * 30;
 
 interface SessionPayload {
@@ -14,6 +14,19 @@ function getSecret(): string {
     throw new Error("AUTH_SESSION_SECRET is not set in .env.local.");
   }
   return secret;
+}
+
+/** Pure signature check — no `next/headers`. Only proves *who* the customer
+ * is; carries no role/permission claims. The admin panel is gated entirely
+ * separately — see lib/admin-session.ts and proxy.ts. */
+export function verifySessionToken(token: string): SessionPayload | null {
+  try {
+    const decoded = jwt.verify(token, getSecret());
+    if (typeof decoded === "string" || !("userId" in decoded)) return null;
+    return { userId: decoded.userId as string };
+  } catch {
+    return null;
+  }
 }
 
 /** Mutates cookies — only callable from a Server Action or Route Handler. */
@@ -37,14 +50,7 @@ export async function getSession(): Promise<SessionPayload | null> {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
   if (!token) return null;
-
-  try {
-    const decoded = jwt.verify(token, getSecret());
-    if (typeof decoded === "string" || !("userId" in decoded)) return null;
-    return { userId: decoded.userId as string };
-  } catch {
-    return null;
-  }
+  return verifySessionToken(token);
 }
 
 /** Mutates cookies — only callable from a Server Action or Route Handler. */

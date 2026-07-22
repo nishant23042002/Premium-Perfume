@@ -14,6 +14,27 @@
 
   --background: var(--ivory);
   --foreground: var(--ink);
+
+  /* Admin panel — a distinct internal-tool palette (never used on the
+     storefront). Sidebar reuses the brand's reserved dark espresso; the
+     amber accent is the one deliberate link back to the storefront brand. */
+  --admin-bg: #f5f3ef;
+  --admin-surface: #ffffff;
+  --admin-border: #e7e1d6;
+  --admin-ink: #211b17;
+  --admin-ink-soft: rgba(33, 27, 23, 0.62);
+  --admin-ink-faint: rgba(33, 27, 23, 0.4);
+  --admin-sidebar: #120f0e;
+  --admin-sidebar-hover: #221c19;
+  --admin-sidebar-active: #2b231f;
+  --admin-sidebar-text: #ede6dd;
+  --admin-sidebar-text-soft: rgba(237, 230, 221, 0.5);
+  --admin-accent: #e3a857;
+  --admin-accent-dark: #c48b3e;
+  --admin-danger: #b3453c;
+  --admin-danger-bg: rgba(179, 69, 60, 0.1);
+  --admin-success: #4f7a4a;
+  --admin-success-bg: rgba(79, 122, 74, 0.1);
 }
 
 @theme inline {
@@ -25,6 +46,24 @@
   --color-secondary: var(--secondary);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-admin-bg: var(--admin-bg);
+  --color-admin-surface: var(--admin-surface);
+  --color-admin-border: var(--admin-border);
+  --color-admin-ink: var(--admin-ink);
+  --color-admin-ink-soft: var(--admin-ink-soft);
+  --color-admin-ink-faint: var(--admin-ink-faint);
+  --color-admin-sidebar: var(--admin-sidebar);
+  --color-admin-sidebar-hover: var(--admin-sidebar-hover);
+  --color-admin-sidebar-active: var(--admin-sidebar-active);
+  --color-admin-sidebar-text: var(--admin-sidebar-text);
+  --color-admin-sidebar-text-soft: var(--admin-sidebar-text-soft);
+  --color-admin-accent: var(--admin-accent);
+  --color-admin-accent-dark: var(--admin-accent-dark);
+  --color-admin-danger: var(--admin-danger);
+  --color-admin-danger-bg: var(--admin-danger-bg);
+  --color-admin-success: var(--admin-success);
+  --color-admin-success-bg: var(--admin-success-bg);
 
   --font-display: var(--font-playfair);
   --font-sans: var(--font-inter);
@@ -99,6 +138,27 @@ body {
   .animate-slide-in-right {
     animation: none;
   }
+}
+
+/* A slim, brand-tinted scrollbar for horizontally-scrolling strips (e.g. the
+   checkout upsell carousel) instead of the browser's default thick bar. */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent-dark) 50%, transparent) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--accent-dark) 50%, transparent);
+  border-radius: 999px;
 }
 
 /* Legibility for text floating directly over photography (hero carousel) —

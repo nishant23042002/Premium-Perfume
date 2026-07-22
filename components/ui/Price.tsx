@@ -1,11 +1,4 @@
-import { cn } from "@/lib/utils";
-
-const formatInr = (value: number) =>
-  new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(value);
+import { cn, formatInr } from "@/lib/utils";
 
 export function Price({
   value,

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 import {
   addToCart as addToCartAction,
   removeCartItem as removeCartItemAction,
@@ -8,10 +8,13 @@ import {
 } from "@/lib/actions/cart";
 import type { CartSummary } from "@/lib/data/cart";
 import type { ProductCardData } from "@/lib/data/products";
+import type { AddressDoc } from "@/lib/data/users";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 
 type CartContextValue = {
   cart: CartSummary;
   recommendations: ProductCardData[];
+  savedAddresses: AddressDoc[];
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
@@ -25,10 +28,12 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({
   initialCart,
   recommendations,
+  savedAddresses,
   children,
 }: {
   initialCart: CartSummary;
   recommendations: ProductCardData[];
+  savedAddresses: AddressDoc[];
   children: ReactNode;
 }) {
   const [cart, setCart] = useState(initialCart);
@@ -47,12 +52,7 @@ export function CartProvider({
     setCart(initialCart);
   }
 
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  useBodyScrollLock("cart-drawer", isOpen);
 
   const addItem = useCallback(async (productId: string, sku: string, quantity = 1) => {
     const updated = await addToCartAction(productId, sku, quantity);
@@ -75,6 +75,7 @@ export function CartProvider({
       value={{
         cart,
         recommendations,
+        savedAddresses,
         isOpen,
         openCart: () => setIsOpen(true),
         closeCart: () => setIsOpen(false),

@@ -7,6 +7,30 @@ export type ActiveAnnouncement = {
   link?: string;
 };
 
+export type AdminAnnouncement = {
+  id: string;
+  text: string;
+  link?: string;
+  isActive: boolean;
+  startsAt?: string;
+  endsAt?: string;
+  order: number;
+};
+
+export async function getAllAnnouncements(): Promise<AdminAnnouncement[]> {
+  await connectToDatabase();
+  const announcements = await AnnouncementModel.find({}).sort({ order: 1 }).lean();
+  return announcements.map((a) => ({
+    id: String(a._id),
+    text: a.text,
+    link: a.link,
+    isActive: a.isActive,
+    startsAt: a.startsAt?.toISOString(),
+    endsAt: a.endsAt?.toISOString(),
+    order: a.order,
+  }));
+}
+
 export async function getActiveAnnouncements(): Promise<ActiveAnnouncement[]> {
   await connectToDatabase();
   const now = new Date();

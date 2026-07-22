@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 
 type AuthModalContextValue = {
   isOpen: boolean;
@@ -13,12 +14,7 @@ const AuthModalContext = createContext<AuthModalContextValue | null>(null);
 export function AuthModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  useBodyScrollLock("login-modal", isOpen);
 
   return (
     <AuthModalContext.Provider
