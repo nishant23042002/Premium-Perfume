@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { Lock, X } from "lucide-react";
 import { Price } from "@/components/ui/Price";
 import { ProductImage } from "@/components/ui/ProductImage";
@@ -16,6 +18,21 @@ const SHIPPING_FEE = 99;
 export function CheckoutModal() {
   const { cart, recommendations, savedAddresses } = useCart();
   const { isOpen, closeCheckout } = useCheckoutModal();
+
+  // Both successful-order paths (COD and Razorpay) end in a server-side
+  // redirect() — e.g. to /account?tab=orders — but that only changes the
+  // page content; this modal lives in the persistent layout and stays
+  // mounted across the navigation, so nothing ever tells it the order is
+  // done. Watching the route itself is the one signal guaranteed to fire
+  // for both payment paths without threading extra state through them.
+  const pathname = usePathname();
+  const prevPathname = useRef(pathname);
+  useEffect(() => {
+    if (pathname !== prevPathname.current) {
+      prevPathname.current = pathname;
+      closeCheckout();
+    }
+  }, [pathname, closeCheckout]);
 
   const shippingFee = cart.subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
   const total = cart.subtotal + shippingFee;

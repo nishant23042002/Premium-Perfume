@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { SearchProductCard } from "@/components/product/SearchProductCard";
 import type { ProductCardData } from "@/lib/data/products";
@@ -31,12 +32,10 @@ export function HeaderSearch({
   const [completedQuery, setCompletedQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useBodyScrollLock("header-search", isOpen);
+
   useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
     if (isOpen) inputRef.current?.focus();
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -131,7 +130,11 @@ export function HeaderSearch({
 
         <div
           className={cn(
-            "relative mx-auto flex max-h-[85vh] w-full max-w-5xl flex-col overflow-hidden bg-ivory shadow-2xl transition-all duration-300 sm:mt-20",
+            // Mobile: unchanged full-width panel pinned to the top. Desktop:
+            // no longer a centered wide dialog — a narrower panel that drops
+            // down from just below the header, right-aligned under the
+            // search icon instead of floating in the middle of the screen.
+            "absolute inset-x-0 top-0 flex max-h-[85vh] w-full flex-col overflow-hidden bg-ivory shadow-2xl transition-all duration-300 sm:inset-x-auto sm:right-8 sm:top-20 sm:w-full sm:max-w-md lg:right-12",
             isOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0",
           )}
         >
@@ -158,26 +161,28 @@ export function HeaderSearch({
             </button>
           </form>
 
-          <div className="flex flex-1 flex-col overflow-hidden sm:flex-row" onClick={handleClickInside}>
-            {/* Category sidebar — reuses the same images/links as the
-                homepage "Shop by Category" section. A horizontal scroll
-                strip on mobile, a proper left column from sm: up. */}
+          <div className="flex flex-1 flex-col overflow-hidden" onClick={handleClickInside}>
+            {/* Category strip — reuses the same images/links as the homepage
+                "Shop by Category" section. Now that this panel is a narrow
+                dropdown rather than a wide dialog, it stays a horizontal
+                scroll strip at every width instead of switching to a left
+                column, which would be cramped at this size. */}
             {categoryShowcase.length > 0 && (
-              <div className="flex shrink-0 gap-3 overflow-x-auto border-b border-ink/10 p-4 sm:w-36 sm:flex-col sm:overflow-y-auto sm:border-b-0 sm:border-r sm:p-4">
+              <div className="scrollbar-none flex shrink-0 gap-3 overflow-x-auto border-b border-ink/10 p-4">
                 {categoryShowcase.map((card) => (
                   <Link
                     key={card._id}
                     href={card.linkHref}
-                    className="group flex shrink-0 flex-col items-center gap-2 sm:shrink"
+                    className="group flex shrink-0 flex-col items-center gap-2"
                   >
-                    <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-ivory-2 sm:h-20 sm:w-full">
+                    <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-ivory-2">
                       <ProductImage
                         publicId={card.image.publicId}
                         alt={card.image.alt}
                         className="h-full w-full transition-transform duration-300 group-hover:scale-105"
                       />
                     </div>
-                    <span className="whitespace-nowrap font-sans text-[11px] uppercase tracking-wide text-ink/70 transition-colors group-hover:text-accent-dark sm:whitespace-normal sm:text-center">
+                    <span className="whitespace-nowrap font-sans text-[11px] uppercase tracking-wide text-ink/70 transition-colors group-hover:text-accent-dark">
                       {card.title}
                     </span>
                   </Link>
@@ -185,7 +190,7 @@ export function HeaderSearch({
               </div>
             )}
 
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="scrollbar-none flex-1 overflow-y-auto p-4 sm:p-6">
               {!trimmedQuery && (
                 <div className="mb-6 flex flex-col gap-3">
                   <span className="font-sans text-xs font-semibold uppercase tracking-[0.15em] text-ink/50">
@@ -219,7 +224,7 @@ export function HeaderSearch({
                       Popular Picks
                     </span>
                   )}
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-6">
                     {productGrid.map((product) => (
                       <SearchProductCard key={product._id} product={product} />
                     ))}

@@ -25,7 +25,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           {product.isBestseller && <Badge tone="accent">Bestseller</Badge>}
           {product.isNewArrival && <Badge tone="ink">New</Badge>}
           {product.isLimitedEdition && <Badge tone="secondary">Limited</Badge>}
-          {product.isComingSoon && <Badge tone="secondary">Coming Soon</Badge>}
+          {product.isComingSoon && <Badge tone="secondary-solid">Coming Soon</Badge>}
         </div>
       </Link>
 

@@ -10,22 +10,29 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { getCart } from "@/lib/data/cart";
 import { getRecommendedProducts } from "@/lib/data/products";
 import { getCurrentUser } from "@/lib/data/users";
+import { getActiveCategoryShowcase } from "@/lib/data/categoryShowcase";
 
 export default async function StorefrontLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [cart, recommendations, user] = await Promise.all([
+  const [cart, recommendations, user, categoryShowcase] = await Promise.all([
     getCart(),
     getRecommendedProducts(8),
     getCurrentUser(),
+    getActiveCategoryShowcase(),
   ]);
 
   return (
     <div className="flex min-h-full flex-col bg-ivory pb-16 text-ink lg:pb-0">
       <AuthModalProvider>
-        <CartProvider initialCart={cart} recommendations={recommendations} savedAddresses={user?.addresses ?? []}>
+        <CartProvider
+          initialCart={cart}
+          recommendations={recommendations}
+          savedAddresses={user?.addresses ?? []}
+          categoryShowcase={categoryShowcase}
+        >
           <CheckoutModalProvider>
             <Header />
             <main className="flex flex-1 flex-col">{children}</main>

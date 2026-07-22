@@ -188,6 +188,18 @@ body {
   border-radius: 999px;
 }
 
+/* Fully hides an element's own scrollbar (scrolling itself still works via
+   wheel/touch/keyboard) — used for the cart/checkout drawers' internal
+   scroll area so it doesn't show its own bar right next to the page's,
+   which is what reads as "two ugly scrollbars" side by side. */
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* Legibility for text floating directly over photography (hero carousel) —
    used instead of an opaque card so the product underneath stays visible. */
 .text-shadow-banner {

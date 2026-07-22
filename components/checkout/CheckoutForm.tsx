@@ -186,7 +186,7 @@ export function CheckoutForm({
 
   return (
     <form action={formAction} className="flex h-full flex-col">
-      <div className="flex-1 overflow-y-auto px-5 py-5">
+      <div className="scrollbar-none flex-1 overflow-y-auto px-5 py-5">
         <div className="flex flex-col gap-8">
           {children}
 

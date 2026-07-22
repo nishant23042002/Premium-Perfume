@@ -9,12 +9,14 @@ import {
 import type { CartSummary } from "@/lib/data/cart";
 import type { ProductCardData } from "@/lib/data/products";
 import type { AddressDoc } from "@/lib/data/users";
+import type { CategoryShowcaseCard } from "@/lib/data/categoryShowcase";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 
 type CartContextValue = {
   cart: CartSummary;
   recommendations: ProductCardData[];
   savedAddresses: AddressDoc[];
+  categoryShowcase: CategoryShowcaseCard[];
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
@@ -29,11 +31,13 @@ export function CartProvider({
   initialCart,
   recommendations,
   savedAddresses,
+  categoryShowcase,
   children,
 }: {
   initialCart: CartSummary;
   recommendations: ProductCardData[];
   savedAddresses: AddressDoc[];
+  categoryShowcase: CategoryShowcaseCard[];
   children: ReactNode;
 }) {
   const [cart, setCart] = useState(initialCart);
@@ -76,6 +80,7 @@ export function CartProvider({
         cart,
         recommendations,
         savedAddresses,
+        categoryShowcase,
         isOpen,
         openCart: () => setIsOpen(true),
         closeCart: () => setIsOpen(false),
