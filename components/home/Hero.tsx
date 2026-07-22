@@ -18,7 +18,7 @@ export async function Hero() {
       tone="ivory"
       className="flex flex-col items-center gap-6 bg-gradient-to-b from-ivory via-ivory to-accent/10 text-center"
     >
-      <Container className="flex flex-col items-center gap-6">
+      <Container className="flex flex-col items-center gap-6 px-4">
         <span className="font-sans text-xs uppercase tracking-[0.4em] text-accent-dark">
           Crafted in small batches
         </span>

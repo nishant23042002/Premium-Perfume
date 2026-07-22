@@ -12,7 +12,7 @@ const points = [
 export function USPStrip() {
   return (
     <Section tone="ivory-2" className="py-10 sm:py-12">
-      <Container className="grid grid-cols-2 gap-8 lg:grid-cols-4">
+      <Container className="grid grid-cols-2 gap-x-6 gap-y-8 px-3 sm:gap-8 lg:grid-cols-4">
         {points.map(({ icon: Icon, label, detail }) => (
           <div key={label} className="flex flex-col items-center gap-2 text-center">
             <Icon className="h-7 w-7 text-accent-dark" strokeWidth={1.5} />

@@ -25,7 +25,7 @@ export default async function AccountPage({
 
   return (
     <Section tone="ivory">
-      <Container className="flex flex-col gap-10">
+      <Container className="flex flex-col gap-10 px-3">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <SectionHeading
             eyebrow="My Account"

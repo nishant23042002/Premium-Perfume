@@ -104,33 +104,52 @@ export function HeroCarousel({ slides }: { slides: ActiveBanner[] }) {
         className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/15 to-transparent sm:bg-gradient-to-r sm:from-ink/50 sm:via-ink/10 sm:to-transparent"
       />
 
-      <Container className="relative z-[1] flex flex-1 flex-col justify-start pt-6 pb-8 sm:flex-none sm:justify-center sm:py-0">
+      <Container className="relative z-[1] flex flex-1 flex-col justify-start px-4 pt-6 pb-8 sm:flex-none sm:justify-center sm:py-0">
         <div className="mx-auto flex max-w-[13rem] flex-col items-center text-center sm:mx-0 sm:max-w-md sm:items-start sm:text-left">
           <span
             key={`subtitle-${active._id}`}
-            className="animate-fade-in text-shadow-banner font-sans text-[10px] uppercase tracking-[0.2em] text-ivory sm:text-xs sm:tracking-[0.35em]"
+            className="animate-fade-in text-shadow-banner font-sans text-[9px] uppercase tracking-[0.2em] text-ivory sm:text-xs sm:tracking-[0.35em]"
           >
             {active.subtitle || "Crafted in small batches"}
           </span>
           <h1
             key={`title-${active._id}`}
-            className="animate-fade-in text-shadow-banner mt-1.5 font-display text-2xl leading-tight text-ivory sm:mt-3 sm:text-5xl"
+            className="animate-fade-in text-shadow-banner mt-0.5 font-display text-2xl leading-tight text-ivory sm:mt-3 sm:text-5xl"
           >
             {active.title || siteConfig.tagline}
           </h1>
           {active.linkHref && (
-            <Button
-              key={`cta-${active._id}`}
-              href={active.linkHref}
-              variant="primary"
-              size="sm"
-              className="animate-fade-in mt-3 sm:mt-5"
-            >
-              Shop Now
-            </Button>
+            <div className="hidden sm:block">
+              <Button
+                key={`cta-${active._id}`}
+                href={active.linkHref}
+                variant="primary"
+                size="sm"
+                className="animate-fade-in mt-3 sm:mt-5"
+              >
+                Shop Now
+              </Button>
+            </div>
           )}
         </div>
       </Container>
+
+      {/* Mobile only — the same CTA, re-anchored to the bottom-center of the
+          banner instead of sitting inline under the headline. Desktop keeps
+          the button above unchanged (hidden here via the sm:hidden wrapper). */}
+      {active.linkHref && (
+        <div className="absolute bottom-8 left-1/2 z-[1] -translate-x-1/2 sm:hidden">
+          <Button
+            key={`cta-mobile-${active._id}`}
+            href={active.linkHref}
+            variant="primary"
+            size="sm"
+            className="animate-fade-in"
+          >
+            Shop Now
+          </Button>
+        </div>
+      )}
 
       {slides.length > 1 && (
         <>

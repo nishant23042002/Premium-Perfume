@@ -15,7 +15,7 @@ export async function WatchAndShop() {
   return (
     <Section tone="ivory" className="py-0">
       <div className="relative flex min-h-[26rem] items-center justify-center overflow-hidden bg-gradient-to-br from-secondary/90 to-secondary text-ivory">
-        <Container className="relative flex flex-col items-center gap-4 py-20 text-center">
+        <Container className="relative flex flex-col items-center gap-4 px-4 py-20 text-center">
           <span className="font-sans text-xs uppercase tracking-[0.35em] text-accent">
             Watch &amp; Shop
           </span>
@@ -33,11 +33,11 @@ export async function WatchAndShop() {
 
         <Link
           href={`/product/${product.slug}`}
-          className="absolute bottom-6 right-6 flex items-center gap-3 bg-ivory px-4 py-3 text-left shadow-lg sm:bottom-8 sm:right-8"
+          className="absolute bottom-6 right-6 flex max-w-[calc(100%-3rem)] items-center gap-3 bg-ivory px-4 py-3 text-left shadow-lg sm:bottom-8 sm:right-8 sm:max-w-xs"
         >
-          <div className="flex flex-col">
+          <div className="flex min-w-0 flex-col">
             <span className="font-sans text-xs text-ink/50">Shop the film</span>
-            <span className="font-display text-base text-secondary">{product.name}</span>
+            <span className="line-clamp-1 font-display text-base text-secondary">{product.name}</span>
             <Price value={variant.price} className="mt-0.5" />
           </div>
         </Link>

@@ -20,9 +20,16 @@ import type { SiteLogo } from "@/lib/data/siteSettings";
 import type { CategoryShowcaseCard } from "@/lib/data/categoryShowcase";
 import type { ProductCardData } from "@/lib/data/products";
 
-// Collapses the announcement row out of view once the page has scrolled
-// past this point, then brings it back when scrolling back up to the top.
-const SCROLL_THRESHOLD = 60;
+// Two separate thresholds (not one) — collapsing and re-expanding at the
+// exact same scroll position creates a feedback loop: right at that pixel,
+// the layout shift from collapsing moves content enough to read as "above
+// the threshold again", so the header flips back open, which shifts it back
+// past the threshold, and so on — a rapid collapse/expand loop that shows up
+// as the header visibly shaking while scrolling near that point. The gap
+// between the two values is a dead zone the scroll position has to fully
+// cross before the header will flip state again.
+const COLLAPSE_AT = 80;
+const EXPAND_AT = 24;
 
 export function HeaderShell({
   categories,
@@ -43,12 +50,24 @@ export function HeaderShell({
   const { openLogin } = useAuthModal();
 
   useEffect(() => {
+    let frame = 0;
     function handleScroll() {
-      setScrolled(window.scrollY > SCROLL_THRESHOLD);
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        setScrolled((prev) => {
+          if (window.scrollY > COLLAPSE_AT) return true;
+          if (window.scrollY < EXPAND_AT) return false;
+          return prev;
+        });
+      });
     }
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   const iconClass = "text-ink transition-colors duration-300 hover:text-accent-dark";
@@ -68,7 +87,7 @@ export function HeaderShell({
         </div>
       </div>
 
-      <Container className="flex h-20 items-center justify-between gap-4">
+      <Container className="flex px-4 h-20 items-center justify-between gap-4">
         <MobileNav categories={categories} />
 
         {logo ? (
@@ -104,15 +123,17 @@ export function HeaderShell({
 
         <div className="flex items-center gap-5">
           <HeaderSearch categoryShowcase={categoryShowcase} featuredProducts={featuredProducts} />
-          {isLoggedIn ? (
-            <Link href="/account" aria-label="Account" className={iconClass}>
-              <User className="h-5 w-5" strokeWidth={1.5} />
-            </Link>
-          ) : (
-            <button type="button" onClick={openLogin} aria-label="Sign In" className={iconClass}>
-              <User className="h-5 w-5" strokeWidth={1.5} />
-            </button>
-          )}
+          <div className="max-sm:hidden">
+            {isLoggedIn ? (
+              <Link href="/account" aria-label="Account" className={iconClass}>
+                <User className="h-5 w-5" strokeWidth={1.5} />
+              </Link>
+            ) : (
+              <button type="button" onClick={openLogin} aria-label="Sign In" className={iconClass}>
+                <User className="h-5 w-5" strokeWidth={1.5} />
+              </button>
+            )}
+          </div>
           <CartTrigger />
         </div>
       </Container>

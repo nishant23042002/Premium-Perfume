@@ -36,7 +36,7 @@ export default async function SearchPage({
 
   return (
     <Section tone="ivory">
-      <Container className="flex flex-col gap-8">
+      <Container className="flex flex-col gap-8 px-3">
         <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Search" }]} />
         <SectionHeading
           eyebrow="Search"

@@ -11,13 +11,13 @@ export async function BestSellers() {
 
   return (
     <Section tone="ivory">
-      <Container className="flex flex-col gap-10">
+      <Container className="flex px-3 flex-col gap-10">
         <SectionHeading
           eyebrow="Most Loved"
           title="Bestsellers"
           description="Chosen again and again by returning customers."
         />
-        <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product._id} product={product} />
           ))}

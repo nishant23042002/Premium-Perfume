@@ -12,7 +12,7 @@ export async function ComingSoon() {
 
   return (
     <Section tone="ivory-2">
-      <Container className="flex flex-col gap-10">
+      <Container className="flex px-3 flex-col gap-10">
         <SectionHeading
           eyebrow="On The Horizon"
           title="Coming Soon"
@@ -20,7 +20,7 @@ export async function ComingSoon() {
         />
         <div
           className={cn(
-            "grid grid-cols-2 gap-x-6 gap-y-10",
+            "grid grid-cols-2 gap-x-3 gap-y-6 sm:gap-x-6 sm:gap-y-10",
             adaptiveProductGridColumns(products.length),
           )}
         >

@@ -14,7 +14,7 @@ export default async function FaqPage() {
 
   return (
     <Section tone="ivory" className="min-h-[60vh]">
-      <Container className="mx-auto flex max-w-2xl flex-col gap-10">
+      <Container className="mx-auto flex max-w-2xl flex-col gap-10 px-4">
         <SectionHeading eyebrow="Support" title="Frequently Asked Questions" align="left" />
         {faqs.length > 0 ? (
           <FaqAccordion items={faqs} />

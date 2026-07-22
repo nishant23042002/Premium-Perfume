@@ -15,7 +15,17 @@ export function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className={cn("py-16 sm:py-24", toneClasses[tone], className)}>
+    <section
+      className={cn(
+        // A hairline top border on every section guarantees a visible seam
+        // between adjacent sections even when they happen to share the same
+        // background tone — relying on the ivory/ivory-2 tint alone (a 6%
+        // color-mix) isn't enough contrast on its own to read as a boundary.
+        "border-t border-ink/10 py-14 sm:py-24",
+        toneClasses[tone],
+        className,
+      )}
+    >
       {children}
     </section>
   );

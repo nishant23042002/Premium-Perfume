@@ -19,7 +19,7 @@ export default async function LoginPage({
 
   return (
     <Section tone="ivory">
-      <Container className="flex justify-center">
+      <Container className="flex justify-center px-4">
         <div className="flex w-full max-w-sm flex-col gap-8">
           <SectionHeading
             eyebrow="Welcome"

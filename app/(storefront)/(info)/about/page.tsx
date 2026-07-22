@@ -14,7 +14,7 @@ const FRAGRANCES = ["AUREVAN", "VAYRÉN", "ORVÉLIS"];
 export default function AboutPage() {
   return (
     <Section tone="ivory">
-      <Container className="flex flex-col items-center gap-14 text-center">
+      <Container className="flex flex-col items-center gap-14 px-4 text-center">
         <div className="flex flex-col items-center gap-4">
           <span className="font-sans text-xs font-medium uppercase tracking-[0.35em] text-accent-dark">
             {siteConfig.name} — About

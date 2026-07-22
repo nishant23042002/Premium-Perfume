@@ -23,7 +23,7 @@ export async function Footer() {
   const categories = await getNavCategories();
 
   return (
-    <footer className="border-t border-ink/10 bg-ivory-2">
+    <footer className="border-t px-3 border-ink/10 bg-ivory-2">
       <div className="border-b border-ink/10 py-10">
         <Container className="grid grid-cols-2 gap-6 sm:grid-cols-4">
           {trustPoints.map(({ icon: Icon, label }) => (

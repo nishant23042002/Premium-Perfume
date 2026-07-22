@@ -45,7 +45,7 @@ export default async function ProductPage({
 
   return (
     <Section tone="ivory">
-      <Container className="flex flex-col gap-16">
+      <Container className="flex flex-col gap-10 px-4 sm:gap-16">
         <Breadcrumb
           items={[
             { label: "Home", href: "/" },
@@ -54,85 +54,95 @@ export default async function ProductPage({
           ]}
         />
 
-        <div className="grid gap-10 lg:grid-cols-2">
-          <Gallery images={product.images} />
+        {/* Image stays pinned in view on desktop while every detail below it
+            (through FAQ) scrolls past on the right — reviews/related break
+            out to full width afterward instead of being squeezed into this
+            column. Mobile stays a plain single-column stack. */}
+        <div className="grid gap-8 sm:gap-10 lg:grid-cols-2 lg:items-start lg:gap-12">
+          <div className="lg:sticky lg:top-24 lg:self-start">
+            <Gallery images={product.images} />
+          </div>
 
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-wrap gap-2">
-              <Badge tone="ink">{product.concentration}</Badge>
-              {product.isBestseller && <Badge tone="accent">Bestseller</Badge>}
-              {product.isNewArrival && <Badge tone="ink">New</Badge>}
-              {product.isLimitedEdition && <Badge tone="secondary">Limited</Badge>}
+          <div className="flex flex-col gap-8 sm:gap-10">
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <div className="flex flex-wrap gap-2">
+                <Badge tone="ink">{product.concentration}</Badge>
+                {product.isBestseller && <Badge tone="accent">Bestseller</Badge>}
+                {product.isNewArrival && <Badge tone="ink">New</Badge>}
+                {product.isLimitedEdition && <Badge tone="secondary">Limited</Badge>}
+              </div>
+
+              <h1 className="font-display text-4xl text-secondary">{product.name}</h1>
+
+              {product.rating.count > 0 && (
+                <a href="#reviews" className="w-fit">
+                  <Rating value={product.rating.average} count={product.rating.count} />
+                </a>
+              )}
+
+              {product.shortDescription && (
+                <p className="font-sans text-base text-ink/70">{product.shortDescription}</p>
+              )}
             </div>
 
-            <h1 className="font-display text-4xl text-secondary">{product.name}</h1>
+            <div className="flex flex-col gap-5 sm:gap-6">
+              <Divider className="justify-start" />
 
-            {product.rating.count > 0 && (
-              <a href="#reviews" className="w-fit">
-                <Rating value={product.rating.average} count={product.rating.count} />
-              </a>
-            )}
+              <PurchasePanel productId={product._id} variants={product.variants} />
 
-            {product.shortDescription && (
-              <p className="font-sans text-base text-ink/70">{product.shortDescription}</p>
-            )}
+              {product.highlights.length > 0 && (
+                <ul className="flex flex-col gap-2 pt-2">
+                  {product.highlights.map((highlight) => (
+                    <li key={highlight} className="flex items-start gap-2 font-sans text-sm text-ink/70">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-dark" />
+                      {highlight}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
-            <Divider className="justify-start" />
+            <div className="flex flex-col gap-4 sm:gap-5">
+              <SectionHeading eyebrow="Composition" title="Notes Pyramid" align="left" />
+              <NotesPyramid notes={product.notes} />
+            </div>
 
-            <PurchasePanel productId={product._id} variants={product.variants} />
-
-            {product.highlights.length > 0 && (
-              <ul className="flex flex-col gap-2 pt-2">
-                {product.highlights.map((highlight) => (
-                  <li key={highlight} className="flex items-start gap-2 font-sans text-sm text-ink/70">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-dark" />
-                    {highlight}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-6">
-          <SectionHeading eyebrow="Composition" title="Notes Pyramid" align="left" />
-          <NotesPyramid notes={product.notes} />
-        </div>
-
-        {product.description && (
-          <div className="flex max-w-3xl flex-col gap-4">
-            <SectionHeading eyebrow="About" title="The Story" align="left" />
-            <p className="font-sans text-sm text-ink/70">{product.description}</p>
-          </div>
-        )}
-
-        {(product.howToUse || product.ingredients) && (
-          <div className="grid gap-10 sm:grid-cols-2">
-            {product.howToUse && (
-              <div className="flex flex-col gap-3">
-                <h2 className="font-sans text-sm font-semibold uppercase tracking-[0.1em] text-ink">
-                  How to Use
-                </h2>
-                <p className="font-sans text-sm text-ink/70">{product.howToUse}</p>
+            {product.description && (
+              <div className="flex flex-col gap-4">
+                <SectionHeading eyebrow="About" title="The Story" align="left" />
+                <p className="font-sans text-sm text-ink/70">{product.description}</p>
               </div>
             )}
-            {product.ingredients && (
-              <div className="flex flex-col gap-3">
-                <h2 className="font-sans text-sm font-semibold uppercase tracking-[0.1em] text-ink">
-                  Ingredients
-                </h2>
-                <p className="font-sans text-sm text-ink/70">{product.ingredients}</p>
+
+            {(product.howToUse || product.ingredients) && (
+              <div className="grid gap-8 sm:grid-cols-2">
+                {product.howToUse && (
+                  <div className="flex flex-col gap-3">
+                    <h2 className="font-sans text-sm font-semibold uppercase tracking-[0.1em] text-ink">
+                      How to Use
+                    </h2>
+                    <p className="font-sans text-sm text-ink/70">{product.howToUse}</p>
+                  </div>
+                )}
+                {product.ingredients && (
+                  <div className="flex flex-col gap-3">
+                    <h2 className="font-sans text-sm font-semibold uppercase tracking-[0.1em] text-ink">
+                      Ingredients
+                    </h2>
+                    <p className="font-sans text-sm text-ink/70">{product.ingredients}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {faqs.length > 0 && (
+              <div className="flex flex-col gap-4">
+                <SectionHeading eyebrow="Support" title="Frequently Asked Questions" align="left" />
+                <FaqAccordion items={faqs} />
               </div>
             )}
           </div>
-        )}
-
-        {faqs.length > 0 && (
-          <div className="flex max-w-2xl flex-col gap-6">
-            <SectionHeading eyebrow="Support" title="Frequently Asked Questions" align="left" />
-            <FaqAccordion items={faqs} />
-          </div>
-        )}
+        </div>
 
         <div className="flex flex-col gap-6">
           <SectionHeading eyebrow="Reviews" title="Customer Reviews" align="left" />

@@ -32,7 +32,7 @@ export function AnnouncementRotator({ announcements }: { announcements: ActiveAn
           type="button"
           aria-label="Previous announcement"
           onClick={() => goTo(active - 1)}
-          className="absolute left-1.5 z-10 flex h-9 w-6 shrink-0 items-center justify-center text-ink/50 transition-colors hover:text-accent-dark sm:left-2"
+          className="absolute max-sm:hidden left-1.5 z-10 flex h-9 w-6 shrink-0 items-center justify-center text-ink/50 transition-colors hover:text-accent-dark sm:left-2"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
         </button>
@@ -58,7 +58,7 @@ export function AnnouncementRotator({ announcements }: { announcements: ActiveAn
               // an off-screen slide can still peek back into view even after
               // translating it fully out — this is what caused the garbled
               // overlapping text.
-              "absolute inset-0 flex items-center justify-center overflow-hidden px-1 transition-transform duration-700 ease-in-out motion-reduce:transition-none",
+              "absolute inset-0 flex items-center px-1 justify-center overflow-hidden transition-transform duration-700 ease-in-out motion-reduce:transition-none",
               isActive ? "translate-x-0" : isPrev ? "-translate-x-full" : "translate-x-full",
             )}
           >
@@ -78,7 +78,7 @@ export function AnnouncementRotator({ announcements }: { announcements: ActiveAn
           type="button"
           aria-label="Next announcement"
           onClick={() => goTo(active + 1)}
-          className="absolute right-1.5 z-10 flex h-9 w-6 shrink-0 items-center justify-center text-ink/50 transition-colors hover:text-accent-dark sm:right-2"
+          className="absolute right-1.5 max-sm:hidden z-10 flex h-9 w-6 shrink-0 items-center justify-center text-ink/50 transition-colors hover:text-accent-dark sm:right-2"
         >
           <ChevronRight className="h-3.5 w-3.5" />
         </button>

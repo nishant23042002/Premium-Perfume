@@ -11,7 +11,7 @@ export async function Testimonials() {
 
   return (
     <Section tone="ivory-2">
-      <Container className="flex flex-col gap-10">
+      <Container className="flex px-3 flex-col gap-10">
         <SectionHeading eyebrow="Customer Love" title="What people are saying" />
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {reviews.map((review) => (

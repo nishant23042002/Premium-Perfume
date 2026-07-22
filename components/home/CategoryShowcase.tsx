@@ -13,7 +13,7 @@ export async function CategoryShowcase() {
   return (
     <Section tone="ivory-2">
       <Container>
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+        <div className="grid px-3 grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
           {cards.map((card) => {
             const url = getCloudinaryUrl(card.image.publicId, { width: 600 });
             return (

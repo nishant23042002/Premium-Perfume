@@ -7,7 +7,7 @@ export type BreadcrumbItem = {
 
 export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
   return (
-    <nav aria-label="Breadcrumb" className="font-sans text-xs text-ink/50">
+    <nav aria-label="Breadcrumb" className="font-sans mx-2 text-xs text-ink/50">
       <ol className="flex flex-wrap items-center gap-1.5">
         {items.map((item, i) => (
           <li key={item.label} className="flex items-center gap-1.5">

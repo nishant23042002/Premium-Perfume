@@ -26,7 +26,7 @@ export default async function OrderConfirmationPage({
 
   return (
     <Section tone="ivory" className="min-h-[60vh]">
-      <Container className="mx-auto flex max-w-2xl flex-col gap-8">
+      <Container className="mx-auto flex max-w-2xl flex-col gap-8 px-4">
         <SectionHeading
           eyebrow="Thank You"
           title="Your order is confirmed"

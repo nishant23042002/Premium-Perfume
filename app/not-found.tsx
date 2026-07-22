@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Page Not Found" };
 export default function NotFound() {
   return (
     <Section tone="ivory" className="flex min-h-[60vh] items-center">
-      <Container className="flex justify-center">
+      <Container className="flex justify-center px-4">
         <div className="flex max-w-md flex-col items-center gap-6 text-center">
           <span className="font-display text-6xl text-accent-dark">404</span>
           <SectionHeading

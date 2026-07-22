@@ -19,7 +19,7 @@ export default function ErrorPage({
 
   return (
     <Section tone="ivory" className="flex min-h-[60vh] items-center">
-      <Container className="flex justify-center">
+      <Container className="flex justify-center px-4">
         <div className="flex max-w-md flex-col items-center gap-6 text-center">
           <SectionHeading
             eyebrow="Something Went Wrong"

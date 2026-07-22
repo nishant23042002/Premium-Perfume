@@ -20,7 +20,7 @@ function AddressForm({ address, onDone }: { address?: AddressDoc; onDone: () => 
   }, [state.success]);
 
   return (
-    <form action={formAction} className="grid gap-4 border border-ink/10 p-6 sm:grid-cols-2">
+    <form action={formAction} className="grid gap-4 sm:border border-ink/10 sm:p-6 sm:grid-cols-2">
       {address && <input type="hidden" name="addressId" value={address._id} />}
       <input
         name="label"
@@ -160,7 +160,7 @@ export function AddressTab({ addresses }: { addresses: AddressDoc[] }) {
       {editing === "new" ? (
         <AddressForm onDone={() => setEditing(null)} />
       ) : (
-        <Button type="button" variant="ghost" className="w-fit" onClick={() => setEditing("new")}>
+        <Button type="button" variant="ghost" className="border border-ink/10" onClick={() => setEditing("new")}>
           + Add New Address
         </Button>
       )}

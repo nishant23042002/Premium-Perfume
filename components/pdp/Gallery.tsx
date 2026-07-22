@@ -13,7 +13,7 @@ export function Gallery({ images }: { images: { publicId: string; alt: string }[
       <ProductImage
         publicId={active.publicId}
         alt={active.alt}
-        className="aspect-[4/5] w-full"
+        className="aspect-square w-full sm:aspect-[4/5]"
         sizes="(min-width: 1024px) 40vw, 100vw"
       />
       {images.length > 1 && (

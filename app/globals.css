@@ -69,6 +69,33 @@
   --font-sans: var(--font-inter);
 }
 
+/* Defensive site-wide guard: no single element should ever be able to widen
+   the page and create a horizontal scrollbar/gap (a fixed-position drawer's
+   off-screen transform, a stray wide image, a future component someone
+   forgets to constrain, etc). Applied only to the root <html> element, not
+   <body> — overflow-x on a non-root element forces its overflow-y to
+   compute to "auto" too, turning it into its own scroll container and
+   breaking every `position: sticky` element inside it (the header). The
+   root element is handled specially by browsers and doesn't have that
+   side effect, which is why this is the standard fix for this exact bug. */
+html {
+  overflow-x: hidden;
+}
+
+/* Scrollbar hidden below the `sm` breakpoint only — scrolling itself is
+   unaffected (wheel, touch, keyboard, drag), this just stops mobile testing
+   tools' reserved scrollbar gutter from ever reading as a page-width
+   mismatch. Desktop/tablet (>=640px) keep the normal native scrollbar. */
+@media (max-width: 639.98px) {
+  html {
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

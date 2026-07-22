@@ -11,7 +11,7 @@ export async function OfferBannerSection() {
 
   return (
     <Section tone="ivory">
-      <Container className="flex flex-col gap-6">
+      <Container className="flex px-3 flex-col gap-6">
         {banners.map((banner) => {
           const url = getCloudinaryUrl(banner.image.publicId, { width: 1200 });
           return (

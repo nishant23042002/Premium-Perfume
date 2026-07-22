@@ -39,7 +39,7 @@ const contactDetails = [
 export default function ContactPage() {
   return (
     <Section tone="ivory">
-      <Container className="flex flex-col gap-10 sm:gap-12">
+      <Container className="flex flex-col gap-10 px-4 sm:gap-12">
         <SectionHeading
           eyebrow="Support"
           title="Get In Touch"

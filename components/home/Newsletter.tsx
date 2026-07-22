@@ -19,7 +19,7 @@ export function Newsletter() {
 
   return (
     <Section tone="ivory">
-      <Container className="flex flex-col items-center gap-6 text-center">
+      <Container className="flex px-3 flex-col items-center gap-6 text-center">
         <SectionHeading
           eyebrow="Stay in the Loop"
           title="Get 10% off your first order"

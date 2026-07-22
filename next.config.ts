@@ -4,6 +4,14 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  // Next.js blocks cross-origin requests to dev-only assets/endpoints by
+  // default — loading the dev server from a phone on the LAN (e.g.
+  // http://192.168.0.103:3000) renders the initial HTML fine, but every JS
+  // asset request that follows gets silently blocked because it doesn't
+  // come from "localhost", so the page never hydrates and nothing is
+  // clickable. This only relaxes that check in development; it has no
+  // effect on a production build.
+  allowedDevOrigins: ["192.168.0.103", "*.local"],
   experimental: {
     serverActions: {
       // Admin image uploads go through Server Actions — default 1MB is too

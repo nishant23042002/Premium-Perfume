@@ -45,8 +45,10 @@ export function PurchasePanel({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        <span className="font-sans text-xs uppercase tracking-[0.15em] text-ink/50">Size</span>
+      <div className="flex mx-3 flex-col gap-2">
+        <span className="font-sans text-xs uppercase tracking-[0.15em] text-ink/50">
+          Size
+        </span>
         <div className="flex flex-wrap gap-2">
           {variants.map((v) => (
             <button
@@ -67,19 +69,25 @@ export function PurchasePanel({
         </div>
       </div>
 
-      <Price value={variant.price} compareAtValue={variant.compareAtPrice} className="text-xl" />
+      <Price
+        value={variant.price}
+        compareAtValue={variant.compareAtPrice}
+        className="text-xl mx-3"
+      />
 
       {!outOfStock && variant.stock <= 10 && (
-        <span className="font-sans text-xs text-accent-dark">Only {variant.stock} left in stock</span>
+        <span className="font-sans text-xs text-accent-dark">
+          Only {variant.stock} left in stock
+        </span>
       )}
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center border border-ink/20">
+      <div className="flex items-center gap-2">
+        <div className="flex mx-3 items-center border border-ink/20">
           <button
             type="button"
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
             aria-label="Decrease quantity"
-            className="flex h-11 w-11 items-center justify-center text-ink disabled:opacity-30"
+            className="flex h-9 w-10 items-center justify-center text-ink disabled:opacity-30"
             disabled={quantity <= 1}
           >
             <Minus className="h-4 w-4" />
@@ -89,7 +97,7 @@ export function PurchasePanel({
             type="button"
             onClick={() => setQuantity((q) => Math.min(variant.stock, q + 1))}
             aria-label="Increase quantity"
-            className="flex h-11 w-11 items-center justify-center text-ink disabled:opacity-30"
+            className="flex h-9 w-10 items-center justify-center text-ink disabled:opacity-30"
             disabled={quantity >= variant.stock}
           >
             <Plus className="h-4 w-4" />
@@ -99,8 +107,7 @@ export function PurchasePanel({
         <Button
           type="button"
           variant="primary"
-          size="lg"
-          className="flex-1"
+          size="md"
           onClick={handleAddToCart}
           disabled={outOfStock || isPending}
         >
