@@ -54,11 +54,21 @@ const nextConfig: NextConfig = {
 
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.google.com https://apis.google.com https://checkout.razorpay.com",
+      // vercel.live: Vercel auto-injects its preview-deployment toolbar
+      // script on every preview URL — harmless, but blocked (and noisy in
+      // the console) without this. Has no effect on the eventual production
+      // domain, where Vercel doesn't inject it.
+      "script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.google.com https://apis.google.com https://checkout.razorpay.com https://vercel.live",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https://res.cloudinary.com https://www.gstatic.com https://www.google.com https://*.razorpay.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.googleapis.com https://*.razorpay.com",
+      // www.google.com/www.gstatic.com: Firebase Phone Auth's invisible
+      // reCAPTCHA makes its actual verification calls to these — script-src
+      // trusts them enough to load the reCAPTCHA script, but without them
+      // here too the script loads and then every network call it makes gets
+      // silently blocked, which is what broke phone login in production
+      // (CSP is dev-disabled, so this never surfaced locally).
+      "connect-src 'self' https://*.googleapis.com https://*.razorpay.com https://www.google.com https://www.gstatic.com",
       "frame-src 'self' https://www.google.com https://*.firebaseapp.com https://api.razorpay.com https://checkout.razorpay.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",

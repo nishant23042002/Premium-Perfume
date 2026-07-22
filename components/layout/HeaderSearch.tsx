@@ -140,13 +140,13 @@ export function HeaderSearch({
             // edge on anything narrower than ~1070px (tablets included). The
             // min() keeps it inside the viewport at every width and only
             // reaches the full 5xl (1024px) cap once there's room to spare.
-            "absolute inset-x-0 top-0 flex max-h-[85vh] w-full flex-col overflow-hidden bg-ivory shadow-2xl transition-all duration-300 sm:inset-x-auto sm:right-8 sm:top-20 sm:w-[min(calc(100%-4rem),64rem)] lg:right-12 lg:w-[min(calc(100%-6rem),64rem)]",
+            "absolute inset-x-0 top-0 flex max-h-[85vh] w-full flex-col overflow-hidden bg-ivory shadow-xl transition-all duration-300 sm:inset-x-auto sm:right-8 sm:top-10 sm:w-[min(calc(100%-4rem),64rem)] lg:right-12 lg:w-[min(calc(100%-6rem),64rem)]",
             isOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0",
           )}
         >
           <form
             onSubmit={handleSubmit}
-            className="flex items-center gap-3 border-b border-ink/10 p-4 sm:p-6"
+            className="flex items-center gap-3 mt-2 border-b border-ink/10 p-4 sm:p-6"
           >
             <Search className="h-5 w-5 shrink-0 text-ink/40" strokeWidth={1.5} />
             <input
