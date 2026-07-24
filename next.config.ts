@@ -69,10 +69,15 @@ const nextConfig: NextConfig = {
       // here too the script loads and then every network call it makes gets
       // silently blocked, which is what broke phone login in production
       // (CSP is dev-disabled, so this never surfaced locally).
-      // *.google-analytics.com/*.analytics.google.com: where gtag.js actually
+      // google-analytics.com/analytics.google.com: where gtag.js actually
       // sends measurement hits — same "script loads, then its calls get
-      // silently blocked" trap without these.
-      "connect-src 'self' https://*.googleapis.com https://*.razorpay.com https://www.google.com https://www.gstatic.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com",
+      // silently blocked" trap without these. Both the bare domain AND the
+      // wildcard are needed: gtag's real collect endpoint is the bare
+      // https://analytics.google.com/g/collect with no subdomain, and a CSP
+      // wildcard like https://*.analytics.google.com does NOT match a
+      // domain with zero subdomain labels — this exact gap silently blocked
+      // every GA4 hit while letting the script itself load fine.
+      "connect-src 'self' https://*.googleapis.com https://*.razorpay.com https://www.google.com https://www.gstatic.com https://www.googletagmanager.com https://google-analytics.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com",
       "frame-src 'self' https://www.google.com https://*.firebaseapp.com https://api.razorpay.com https://checkout.razorpay.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
