@@ -125,7 +125,13 @@ export function CartDrawer() {
               variant="primary"
               size="lg"
               className="w-full"
-              onClick={() => {
+              onClick={(event) => {
+                // Closing the drawer sets aria-hidden="true" on it — doing
+                // that while this button (which the user just clicked)
+                // still holds focus traps focus inside a hidden subtree,
+                // which is invalid for assistive tech. Blur it first so
+                // focus is already clear before the drawer hides.
+                event.currentTarget.blur();
                 closeCart();
                 openCheckout();
               }}

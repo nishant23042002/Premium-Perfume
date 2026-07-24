@@ -80,6 +80,14 @@
    side effect, which is why this is the standard fix for this exact bug. */
 html {
   overflow-x: hidden;
+  /* We already own scroll-to-top on every navigation explicitly
+     (components/layout/ScrollToTop.tsx). Without this, the browser's own
+     scroll anchoring can "helpfully" re-adjust scroll position on its own
+     whenever streamed-in content (images, late data) shifts page height
+     shortly after that scrollTo(0, 0) already ran — the intermittent
+     "sometimes lands mid-page" navigation behavior was this fighting with
+     our own explicit scroll control, not a bug in the control itself. */
+  overflow-anchor: none;
 }
 
 /* Scrollbar hidden below the `sm` breakpoint only — scrolling itself is

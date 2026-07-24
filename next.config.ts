@@ -59,7 +59,10 @@ const nextConfig: NextConfig = {
       // the console) without this. Has no effect on the eventual production
       // domain, where Vercel doesn't inject it.
       // www.googletagmanager.com: loads gtag.js for Google Analytics.
-      "script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.google.com https://apis.google.com https://checkout.razorpay.com https://vercel.live https://www.googletagmanager.com",
+      // cdn.razorpay.com: Razorpay's own fraud/risk-detection bundle, loaded
+      // alongside the checkout widget — a different subdomain from
+      // checkout.razorpay.com, so allowing that one doesn't cover this one.
+      "script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.google.com https://apis.google.com https://checkout.razorpay.com https://cdn.razorpay.com https://vercel.live https://www.googletagmanager.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https://res.cloudinary.com https://www.gstatic.com https://www.google.com https://*.razorpay.com https://www.googletagmanager.com",
       "font-src 'self' data:",
