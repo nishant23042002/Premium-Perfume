@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { X, Sparkles, Truck, MapPin, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthModal } from "@/lib/auth-modal-context";
@@ -15,7 +14,6 @@ const PERKS = [
 ];
 
 export function LoginModal() {
-  const router = useRouter();
   const { isOpen, closeLogin } = useAuthModal();
 
   useEffect(() => {
@@ -107,7 +105,14 @@ export function LoginModal() {
             <PhoneLoginForm
               onSuccess={() => {
                 closeLogin();
-                router.refresh();
+                // A full reload, not router.refresh() — the modal can open
+                // from any page, and refresh() only refreshes the page
+                // you're already on. Other routes (e.g. a nav link
+                // prefetched while still logged out) keep serving their
+                // stale cached result until something forces a real
+                // reload — this guarantees every route reads the new
+                // session cookie from here on.
+                window.location.reload();
               }}
             />
           )}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 import { firebaseAuth } from "@/lib/firebase-client";
 import { loginWithPhone } from "@/lib/actions/auth";
@@ -47,7 +46,6 @@ export function PhoneLoginForm({
   redirectTo?: string;
   onSuccess?: () => void;
 }) {
-  const router = useRouter();
   const [step, setStep] = useState<Step>("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -130,8 +128,14 @@ export function PhoneLoginForm({
         if (onSuccess) {
           onSuccess();
         } else {
-          router.push(redirectTo);
-          router.refresh();
+          // A hard navigation, not router.push()+refresh() — login changes
+          // the session cookie, and Next.js's client-side prefetch cache
+          // for OTHER routes (e.g. a nav link that got auto-prefetched
+          // while still logged out) doesn't get invalidated by refreshing
+          // just the current page. Only a full navigation guarantees every
+          // route reads the new cookie instead of serving a stale
+          // logged-out prefetch.
+          window.location.href = redirectTo;
         }
       } catch (err) {
         setError(

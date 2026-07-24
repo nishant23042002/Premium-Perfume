@@ -77,7 +77,10 @@ const nextConfig: NextConfig = {
       // wildcard like https://*.analytics.google.com does NOT match a
       // domain with zero subdomain labels — this exact gap silently blocked
       // every GA4 hit while letting the script itself load fine.
-      "connect-src 'self' https://*.googleapis.com https://*.razorpay.com https://www.google.com https://www.gstatic.com https://www.googletagmanager.com https://google-analytics.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com",
+      // stats.g.doubleclick.net: GA4's companion beacon for Google
+      // Signals/Ads Linking — a second endpoint gtag.js calls alongside
+      // the analytics.google.com one whenever that feature is enabled.
+      "connect-src 'self' https://*.googleapis.com https://*.razorpay.com https://www.google.com https://www.gstatic.com https://www.googletagmanager.com https://google-analytics.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net",
       "frame-src 'self' https://www.google.com https://*.firebaseapp.com https://api.razorpay.com https://checkout.razorpay.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
