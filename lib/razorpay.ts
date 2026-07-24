@@ -41,6 +41,24 @@ export function verifyPaymentSignature(
   return crypto.timingSafeEqual(expectedBuf, actualBuf);
 }
 
+/** Issues a real refund through Razorpay for a captured payment — this is
+ * what actually returns money to the customer; changing an order's own
+ * status field never does. `amountRupees` is converted to paise (Razorpay's
+ * base unit) here so every caller works in the same rupee units as the rest
+ * of the app. Throws on failure (already refunded, insufficient balance,
+ * unknown payment id, etc.) — callers must not update local order state
+ * unless this resolves successfully. */
+export async function refundPayment(
+  paymentId: string,
+  amountRupees: number,
+): Promise<{ refundId: string }> {
+  const razorpay = getRazorpayClient();
+  const refund = await razorpay.payments.refund(paymentId, {
+    amount: Math.round(amountRupees * 100),
+  });
+  return { refundId: refund.id };
+}
+
 /** Verifies a Razorpay webhook request body against the separate webhook
  * secret configured in the Dashboard (Settings > Webhooks) — not the API
  * key secret used for checkout signature verification above. */

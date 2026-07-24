@@ -11,9 +11,7 @@ import { useCart } from "@/lib/cart-context";
 import { useCheckoutModal } from "@/lib/checkout-modal-context";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { getDefaultVariant } from "@/lib/product";
-
-const FREE_SHIPPING_THRESHOLD = 999;
-const SHIPPING_FEE = 99;
+import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 
 export function CheckoutModal() {
   const { cart, recommendations, savedAddresses } = useCart();

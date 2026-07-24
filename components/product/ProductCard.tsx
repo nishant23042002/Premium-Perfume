@@ -35,7 +35,9 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             {product.shortDescription}
           </span>
         )}
-        <h3 className="line-clamp-1 font-display text-lg text-ink">{product.name}</h3>
+        <h3 className="line-clamp-1 font-display text-lg text-ink transition-colors duration-200 group-hover:text-accent-dark">
+          {product.name}
+        </h3>
         {product.rating.count > 0 && (
           <Rating value={product.rating.average} count={product.rating.count} />
         )}

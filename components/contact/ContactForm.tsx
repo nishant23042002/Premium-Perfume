@@ -43,7 +43,7 @@ export function ContactForm() {
 
       {state?.error && <p className="font-sans text-sm text-secondary">{state.error}</p>}
 
-      <Button type="submit" variant="primary" size="lg" disabled={isPending} className="w-fit">
+      <Button type="submit" variant="primary" size="lg" loading={isPending} disabled={isPending} className="w-fit">
         {isPending ? "Sending..." : "Send Message"}
       </Button>
     </form>

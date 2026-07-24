@@ -67,6 +67,17 @@ export function PhoneLoginForm({
     return recaptchaRef.current;
   }
 
+  // An invisible reCAPTCHA widget is single-use — once it's backed one
+  // signInWithPhoneNumber call, reusing the same instance for a second call
+  // (e.g. after "Change Number") fails without a rendering-level error, and
+  // surfaces here as "Couldn't send the code" for a number that's actually
+  // fine. .clear() tears down the rendered widget so getRecaptcha() builds a
+  // fresh one next time instead of reusing the spent one.
+  function resetRecaptcha() {
+    recaptchaRef.current?.clear();
+    recaptchaRef.current = null;
+  }
+
   function handleSendOtp(event: FormEvent) {
     event.preventDefault();
     setError(null);
@@ -83,6 +94,10 @@ export function PhoneLoginForm({
         confirmationRef.current = await signInWithPhoneNumber(firebaseAuth, `+91${digits}`, verifier);
         setStep("otp");
       } catch (err) {
+        // Whatever state the widget is in after a failure, it can't safely
+        // be reused for the next attempt — always rebuild it, not just on
+        // the explicit "Change Number" path.
+        resetRecaptcha();
         setError(getErrorMessage(err, SEND_ERROR_MESSAGES, "Couldn't send the code. Please try again."));
       }
     });
@@ -164,13 +179,15 @@ export function PhoneLoginForm({
 
         {error && <p className="font-sans text-sm text-secondary">{error}</p>}
 
-        <Button type="submit" variant="primary" size="lg" disabled={isPending}>
+        <Button type="submit" variant="primary" size="lg" loading={isPending}>
           {isPending ? "Verifying..." : "Verify & Continue"}
         </Button>
 
         <button
           type="button"
           onClick={() => {
+            resetRecaptcha();
+            confirmationRef.current = null;
             setStep("phone");
             setOtp("");
             setError(null);
@@ -209,7 +226,7 @@ export function PhoneLoginForm({
 
       <div id="recaptcha-container" />
 
-      <Button type="submit" variant="primary" size="lg" disabled={isPending}>
+      <Button type="submit" variant="primary" size="lg" loading={isPending}>
         {isPending ? "Sending Code..." : "Send OTP"}
       </Button>
     </form>

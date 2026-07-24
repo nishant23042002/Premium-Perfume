@@ -50,8 +50,34 @@ const orderSchema = new Schema(
 
     status: {
       type: String,
-      enum: ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled", "refunded"],
+      enum: [
+        "pending",
+        "confirmed",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancellation_requested",
+        "cancelled",
+        "refunded",
+      ],
       default: "pending",
+    },
+
+    // Present once a cancellation has been requested (by the customer or an
+    // admin). For orders with nothing to refund, this is filled in and
+    // resolved in the same step ("auto"). For paid Razorpay orders, the
+    // customer's request only reaches here as "cancellation_requested" —
+    // resolution stays unset until an admin approves (refund) or rejects it.
+    cancellation: {
+      reason: { type: String },
+      requestedBy: { type: String, enum: ["customer", "admin"] },
+      requestedAt: { type: Date },
+      // Snapshot of `status` at request time, so a rejection can restore it
+      // exactly rather than guessing a fallback.
+      previousStatus: { type: String },
+      resolution: { type: String, enum: ["auto", "approved", "rejected"] },
+      resolvedAt: { type: Date },
+      resolvedBy: { type: String },
     },
 
     payment: {
@@ -67,6 +93,10 @@ const orderSchema = new Schema(
       razorpayOrderId: { type: String, index: true },
       transactionId: { type: String },
       paidAt: { type: Date },
+      // Set only once a real Razorpay refund has actually been issued —
+      // never set just because status.payment was switched to "refunded".
+      refundId: { type: String },
+      refundedAt: { type: Date },
     },
   },
   { timestamps: true },

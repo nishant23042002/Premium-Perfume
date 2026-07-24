@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState, type ReactNode } from "rea
 import { useRouter } from "next/navigation";
 import { Check, MapPin, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Spinner } from "@/components/ui/Spinner";
 import { cn } from "@/lib/utils";
 import {
   placeOrder,
@@ -185,7 +186,20 @@ export function CheckoutForm({
   }, [state.razorpay]);
 
   return (
-    <form action={formAction} className="flex h-full flex-col">
+    <form action={formAction} className="relative flex h-full flex-col">
+      {isVerifying && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ivory/95 backdrop-blur-sm"
+        >
+          <Spinner className="h-8 w-8 text-accent-dark" />
+          <p className="font-display text-base text-secondary">Confirming your payment…</p>
+          <p className="max-w-[220px] text-center font-sans text-xs text-ink/50">
+            Please don&apos;t close this window.
+          </p>
+        </div>
+      )}
       <div className="scrollbar-none flex-1 overflow-y-auto px-5 py-5">
         <div className="flex flex-col gap-8">
           {children}
@@ -418,7 +432,13 @@ export function CheckoutForm({
             <p className="font-sans text-sm text-secondary">{state?.error || razorpayError}</p>
           )}
 
-          <Button type="submit" variant="primary" size="lg" disabled={isPending || isVerifying}>
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            loading={isPending || isVerifying}
+            disabled={isPending || isVerifying}
+          >
             {isVerifying
               ? "Confirming Payment..."
               : isPending

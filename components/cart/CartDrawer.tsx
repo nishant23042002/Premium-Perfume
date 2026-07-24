@@ -10,13 +10,14 @@ import { useCart } from "@/lib/cart-context";
 import { useCheckoutModal } from "@/lib/checkout-modal-context";
 import { CartDrawerLineItem } from "@/components/cart/CartDrawerLineItem";
 import { CartRecommendations } from "@/components/cart/CartRecommendations";
-
-const FREE_SHIPPING_THRESHOLD = 999;
+import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 
 export function CartDrawer() {
   const { cart, categoryShowcase, isOpen, closeCart } = useCart();
   const { openCheckout } = useCheckoutModal();
-  const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - cart.subtotal);
+  // While SHIPPING_FEE is 0, every order already ships free — showing "add
+  // ₹X more" would be actively misleading, not just unnecessary.
+  const remaining = SHIPPING_FEE === 0 ? 0 : Math.max(0, FREE_SHIPPING_THRESHOLD - cart.subtotal);
 
   return (
     <div

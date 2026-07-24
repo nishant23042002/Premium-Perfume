@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
@@ -7,6 +9,7 @@ import { AuthModalProvider } from "@/lib/auth-modal-context";
 import { CheckoutModal } from "@/components/checkout/CheckoutModal";
 import { CheckoutModalProvider } from "@/lib/checkout-modal-context";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { RouteTransitionOverlay } from "@/components/layout/RouteTransitionOverlay";
 import { getCart } from "@/lib/data/cart";
 import { getRecommendedProducts } from "@/lib/data/products";
 import { getCurrentUser } from "@/lib/data/users";
@@ -24,8 +27,16 @@ export default async function StorefrontLayout({
     getActiveCategoryShowcase(),
   ]);
 
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
   return (
     <div className="flex min-h-full flex-col bg-ivory pb-16 text-ink lg:pb-0">
+      {/* Storefront only — scoped out of /admin so staff navigating the
+          dashboard never mixes into customer traffic analytics. */}
+      {gaId && <GoogleAnalytics gaId={gaId} />}
+      <Suspense fallback={null}>
+        <RouteTransitionOverlay />
+      </Suspense>
       <AuthModalProvider>
         <CartProvider
           initialCart={cart}

@@ -140,7 +140,7 @@ export function HeaderSearch({
             // edge on anything narrower than ~1070px (tablets included). The
             // min() keeps it inside the viewport at every width and only
             // reaches the full 5xl (1024px) cap once there's room to spare.
-            "absolute inset-x-0 top-0 flex max-h-[85vh] w-full flex-col overflow-hidden bg-ivory shadow-xl transition-all duration-300 sm:inset-x-auto sm:right-8 sm:top-10 sm:w-[min(calc(100%-4rem),64rem)] lg:right-12 lg:w-[min(calc(100%-6rem),64rem)]",
+            "absolute inset-x-0 top-0 flex max-h-[86vh] w-full flex-col overflow-hidden bg-ivory shadow-xl transition-all duration-300 sm:inset-x-auto sm:right-8 sm:top-10 sm:w-[min(calc(100%-4rem),64rem)] lg:right-12 lg:w-[min(calc(100%-6rem),64rem)]",
             isOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0",
           )}
         >

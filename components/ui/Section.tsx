@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Reveal } from "@/components/ui/Reveal";
 
 const toneClasses = {
   ivory: "bg-ivory text-ink",
@@ -26,7 +27,7 @@ export function Section({
         className,
       )}
     >
-      {children}
+      <Reveal>{children}</Reveal>
     </section>
   );
 }

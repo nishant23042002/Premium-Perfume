@@ -10,12 +10,15 @@ export function Gallery({ images }: { images: { publicId: string; alt: string }[
 
   return (
     <div className="flex flex-col gap-3">
-      <ProductImage
-        publicId={active.publicId}
-        alt={active.alt}
-        className="aspect-square w-full sm:aspect-[4/5]"
-        sizes="(min-width: 1024px) 40vw, 100vw"
-      />
+      <div className="group overflow-hidden">
+        <ProductImage
+          key={active.publicId}
+          publicId={active.publicId}
+          alt={active.alt}
+          className="aspect-square w-full animate-fade-in transition-transform duration-500 group-hover:scale-[1.04] sm:aspect-[4/5]"
+          sizes="(min-width: 1024px) 40vw, 100vw"
+        />
+      </div>
       {images.length > 1 && (
         <div className="flex gap-3">
           {images.map((image, i) => (
@@ -26,7 +29,7 @@ export function Gallery({ images }: { images: { publicId: string; alt: string }[
               aria-label={`View image ${i + 1} of ${images.length}`}
               aria-pressed={i === activeIndex}
               className={cn(
-                "h-20 w-16 overflow-hidden border-2 transition-colors",
+                "h-20 w-16 overflow-hidden border-2 transition-all duration-200 hover:opacity-80",
                 i === activeIndex ? "border-accent-dark" : "border-transparent",
               )}
             >

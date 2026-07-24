@@ -109,6 +109,7 @@ export function PurchasePanel({
           variant="primary"
           size="md"
           onClick={handleAddToCart}
+          loading={isPending}
           disabled={outOfStock || isPending}
         >
           {outOfStock ? "Out of Stock" : isPending ? "Adding..." : "Add to Bag"}

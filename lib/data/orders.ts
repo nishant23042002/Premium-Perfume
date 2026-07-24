@@ -1,7 +1,12 @@
 import { connectToDatabase } from "@/lib/db/connect";
 import { OrderModel } from "@/models/Order";
 import { ProductModel } from "@/models/Product";
-import { ORDER_STATUSES, type OrderStatus, type AdminOrderRow } from "@/lib/order-status";
+import {
+  ORDER_STATUSES,
+  type OrderStatus,
+  type AdminOrderRow,
+  type OrderCancellation,
+} from "@/lib/order-status";
 
 export { ORDER_STATUSES, type OrderStatus, type AdminOrderRow };
 
@@ -69,7 +74,12 @@ export type AccountOrder = {
   couponCode?: string;
   total: number;
   status: string;
-  payment: { provider: "cod" | "razorpay" | "stripe" | null; status: string };
+  payment: {
+    provider: "cod" | "razorpay" | "stripe" | null;
+    status: string;
+    refundedAt?: string;
+  };
+  cancellation?: OrderCancellation;
   createdAt: string;
 };
 
@@ -133,7 +143,22 @@ export async function getOrdersByUserId(userId: string): Promise<AccountOrder[]>
     couponCode: order.couponCode,
     total: order.total,
     status: order.status,
-    payment: { provider: order.payment.provider, status: order.payment.status },
+    payment: {
+      provider: order.payment.provider,
+      status: order.payment.status,
+      refundedAt: order.payment.refundedAt?.toISOString(),
+    },
+    cancellation: order.cancellation
+      ? {
+          reason: order.cancellation.reason,
+          requestedBy: order.cancellation.requestedBy,
+          requestedAt: order.cancellation.requestedAt?.toISOString(),
+          previousStatus: order.cancellation.previousStatus as OrderStatus | undefined,
+          resolution: order.cancellation.resolution,
+          resolvedAt: order.cancellation.resolvedAt?.toISOString(),
+          resolvedBy: order.cancellation.resolvedBy,
+        }
+      : undefined,
     createdAt: order.createdAt.toISOString(),
   }));
 }
@@ -155,7 +180,7 @@ export async function getOrdersForAdmin(options: {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(ADMIN_PAGE_SIZE)
-      .select("orderNumber shippingAddress.fullName items total status payment createdAt")
+      .select("orderNumber shippingAddress.fullName items total status payment cancellation createdAt")
       .lean(),
     OrderModel.countDocuments(filter),
   ]);
@@ -170,6 +195,17 @@ export async function getOrdersForAdmin(options: {
       paymentProvider: order.payment.provider,
       paymentStatus: order.payment.status,
       createdAt: order.createdAt.toISOString(),
+      cancellation: order.cancellation
+        ? {
+            reason: order.cancellation.reason,
+            requestedBy: order.cancellation.requestedBy,
+            requestedAt: order.cancellation.requestedAt?.toISOString(),
+            previousStatus: order.cancellation.previousStatus as OrderStatus | undefined,
+            resolution: order.cancellation.resolution,
+            resolvedAt: order.cancellation.resolvedAt?.toISOString(),
+            resolvedBy: order.cancellation.resolvedBy,
+          }
+        : undefined,
     })),
     total,
     page,

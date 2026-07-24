@@ -7,13 +7,15 @@ import { connectToDatabase } from "@/lib/db/connect";
 import { CartModel } from "@/models/Cart";
 import { ProductModel } from "@/models/Product";
 import { OrderModel } from "@/models/Order";
-import { CouponModel } from "@/models/Coupon";
 import { getCartSessionId } from "@/lib/cart-session";
 import { getSession } from "@/lib/auth-session";
-import { saveAddressFromOrder } from "@/lib/data/users";
+import { saveAddressFromOrder, getCurrentUser } from "@/lib/data/users";
 import { getRazorpayClient, verifyPaymentSignature } from "@/lib/razorpay";
 import { decrementStock, restockItem } from "@/lib/inventory";
-import { sendOrderConfirmationEmail } from "@/lib/email";
+import { applyCoupon, releaseCoupon, type AppliedCoupon } from "@/lib/coupons";
+import { sendOrderConfirmationEmail, sendOrderCancelledEmail, sendCancellationRequestedEmail } from "@/lib/email";
+import { SHIPPING_FEE, FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
+import { CUSTOMER_CANCELLABLE_STATUSES, type OrderStatus } from "@/lib/order-status";
 
 const PAYMENT_LABEL: Record<string, string> = {
   cod: "Cash on Delivery",
@@ -26,8 +28,6 @@ export type CheckoutState = {
 };
 
 const REQUIRED_FIELDS = ["fullName", "phone", "line1", "city", "state", "pincode"] as const;
-const FREE_SHIPPING_THRESHOLD = 999;
-const SHIPPING_FEE = 99;
 
 type CartItemLike = {
   productId: Types.ObjectId;
@@ -42,56 +42,6 @@ type LeanProductForOrder = {
   images: { publicId: string; alt: string }[];
   variants: { sku: string; sizeMl: number }[];
 };
-
-type AppliedCoupon = { code: string; discount: number };
-
-/** Validates a coupon against the current order (specific, friendly error
- * messages), then atomically claims one use — the usage-limit check is
- * re-verified inside the same update so two customers racing for the last
- * redemption of a limited code can't both win. */
-async function applyCoupon(
-  rawCode: string,
-  subtotal: number,
-): Promise<{ ok: true; coupon: AppliedCoupon } | { ok: false; error: string }> {
-  const code = rawCode.trim().toUpperCase();
-  const coupon = await CouponModel.findOne({ code });
-
-  if (!coupon || !coupon.isActive) return { ok: false, error: "That coupon code isn't valid." };
-  if (coupon.expiresAt && coupon.expiresAt.getTime() < Date.now()) {
-    return { ok: false, error: "That coupon code has expired." };
-  }
-  if (coupon.minOrderValue && subtotal < coupon.minOrderValue) {
-    return { ok: false, error: `This code needs a minimum order of ₹${coupon.minOrderValue}.` };
-  }
-
-  const claimed = await CouponModel.findOneAndUpdate(
-    {
-      _id: coupon._id,
-      $expr: {
-        $or: [
-          // A missing usageLimit field is NOT the same as an explicit null
-          // to $expr's strict $eq — $ifNull normalizes "field absent" to
-          // null so uncapped coupons (no usageLimit set at all) match here.
-          { $eq: [{ $ifNull: ["$usageLimit", null] }, null] },
-          { $lt: ["$usedCount", "$usageLimit"] },
-        ],
-      },
-    },
-    { $inc: { usedCount: 1 } },
-    { returnDocument: "after" },
-  );
-  if (!claimed) return { ok: false, error: "This coupon code just reached its usage limit." };
-
-  let discount = coupon.type === "percentage" ? Math.round((subtotal * coupon.value) / 100) : coupon.value;
-  if (coupon.maxDiscount) discount = Math.min(discount, coupon.maxDiscount);
-  discount = Math.min(discount, subtotal);
-
-  return { ok: true, coupon: { code, discount } };
-}
-
-async function releaseCoupon(code: string): Promise<void> {
-  await CouponModel.updateOne({ code }, { $inc: { usedCount: -1 } });
-}
 
 type ShippingAddress = {
   fullName: string;
@@ -416,4 +366,82 @@ export async function cancelPendingOrder(orderNumber: string): Promise<void> {
 
   order.status = "cancelled";
   await order.save();
+}
+
+export type CancelOrderState = { error?: string; success?: boolean };
+
+/** Customer-initiated cancellation, only reachable from the account page for
+ * an order the logged-in user actually owns. An order that was never
+ * actually charged (COD, or a Razorpay order abandoned before payment) is
+ * cancelled immediately — there's no money to return. A Razorpay order that
+ * WAS paid instead moves to "cancellation_requested": the refund isn't
+ * fired here, it waits for an admin to approve it via
+ * resolveCancellationRequest in lib/actions/orders.ts. */
+export async function requestCancellation(orderNumber: string, reason: string): Promise<CancelOrderState> {
+  const user = await getCurrentUser();
+  if (!user) return { error: "Please log in to manage your orders." };
+
+  await connectToDatabase();
+  const order = await OrderModel.findOne({ orderNumber });
+  if (!order) return { error: "Order not found." };
+  if (!order.userId || String(order.userId) !== user.id) {
+    return { error: "You don't have permission to cancel this order." };
+  }
+
+  const previousStatus = order.status as OrderStatus;
+  if (!CUSTOMER_CANCELLABLE_STATUSES.includes(previousStatus)) {
+    return { error: "This order can no longer be cancelled — it's already on its way." };
+  }
+
+  const trimmedReason = reason.trim().slice(0, 300) || undefined;
+  const wasPaidOnline = order.payment.provider === "razorpay" && order.payment.status === "paid";
+
+  if (!wasPaidOnline) {
+    for (const item of order.items) {
+      await restockItem(item.productId, item.sku, item.quantity);
+    }
+    if (order.couponCode) await releaseCoupon(order.couponCode);
+
+    const now = new Date();
+    order.status = "cancelled";
+    order.cancellation = {
+      reason: trimmedReason,
+      requestedBy: "customer",
+      requestedAt: now,
+      previousStatus,
+      resolution: "auto",
+      resolvedAt: now,
+    };
+    await order.save();
+
+    if (order.email) {
+      await sendOrderCancelledEmail({
+        to: order.email,
+        orderNumber: order.orderNumber,
+        total: order.total,
+        reason: trimmedReason,
+      });
+    }
+  } else {
+    order.status = "cancellation_requested";
+    order.cancellation = {
+      reason: trimmedReason,
+      requestedBy: "customer",
+      requestedAt: new Date(),
+      previousStatus,
+    };
+    await order.save();
+
+    if (order.email) {
+      await sendCancellationRequestedEmail({
+        to: order.email,
+        orderNumber: order.orderNumber,
+        total: order.total,
+        reason: trimmedReason,
+      });
+    }
+  }
+
+  revalidatePath("/account");
+  return { success: true };
 }

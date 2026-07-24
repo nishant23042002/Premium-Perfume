@@ -58,7 +58,7 @@ export function ProfileTab({ user }: { user: CurrentUser }) {
       />
       {state.error && <p className="font-sans text-sm text-secondary">{state.error}</p>}
       <div className="flex gap-3">
-        <Button type="submit" variant="primary" disabled={isPending}>
+        <Button type="submit" variant="primary" loading={isPending} disabled={isPending}>
           {isPending ? "Saving..." : "Save Changes"}
         </Button>
         <Button type="button" variant="ghost" onClick={() => setIsEditing(false)}>
