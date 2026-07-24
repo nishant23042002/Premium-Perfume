@@ -14,7 +14,11 @@ export async function Header() {
       getActiveAnnouncements(),
       getSiteLogo(),
       getActiveCategoryShowcase(),
-      getRecommendedProducts(6),
+      // Same limit as the storefront layout's own getRecommendedProducts(8)
+      // call — cache() only dedupes calls with matching arguments, so this
+      // has to match exactly to actually share the one query instead of
+      // firing a second one just for a different slice length.
+      getRecommendedProducts(8),
     ]);
 
   return (

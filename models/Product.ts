@@ -85,6 +85,18 @@ productSchema.pre("save", function () {
   }
 });
 
+// Every storefront product query filters on `status: "active"` combined
+// with one of these flags/fields — without these, each one falls back to a
+// full collection scan. Matched directly to the query shapes in
+// lib/data/products.ts (getBestsellerProducts, getNewArrivals,
+// getComingSoonProducts, getProductList, getRecommendedProducts).
+productSchema.index({ status: 1, isBestseller: 1, "rating.average": -1 });
+productSchema.index({ status: 1, isNewArrival: 1, createdAt: -1 });
+productSchema.index({ status: 1, isComingSoon: 1, createdAt: -1 });
+productSchema.index({ status: 1, categoryIds: 1, createdAt: -1 });
+productSchema.index({ status: 1, createdAt: -1 });
+productSchema.index({ status: 1, "rating.average": -1 });
+
 export type Product = InferSchemaType<typeof productSchema>;
 
 export const ProductModel = models.Product ?? model("Product", productSchema);

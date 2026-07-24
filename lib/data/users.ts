@@ -1,4 +1,5 @@
 import type { Types } from "mongoose";
+import { cache } from "react";
 import { connectToDatabase } from "@/lib/db/connect";
 import { UserModel } from "@/models/User";
 import { getSession } from "@/lib/auth-session";
@@ -63,8 +64,11 @@ export async function findOrCreateUserByPhone(
   return toCurrentUser(existing!);
 }
 
-/** Reads the logged-in user from the session cookie, or null if not logged in. Safe for Server Components. */
-export async function getCurrentUser(): Promise<CurrentUser | null> {
+/** Reads the logged-in user from the session cookie, or null if not logged
+ * in. Safe for Server Components. Wrapped in `cache()` — the storefront
+ * layout and Header both call this on every request, and without
+ * memoization that's two identical DB round trips per navigation. */
+export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const session = await getSession();
   if (!session) return null;
 
@@ -73,7 +77,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   if (!user) return null;
 
   return toCurrentUser(user);
-}
+});
 
 type OrderAddressInput = {
   fullName: string;

@@ -3,16 +3,23 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
+const SAFETY_TIMEOUT_MS = 1200;
+
 /** Fades + slides its children into place the first time they scroll into
- * view (IntersectionObserver fires immediately for content already in the
- * viewport on mount, so above-the-fold content reveals right away).
+ * view. Always starts hidden on both server and client renders — branching
+ * the initial state on `window.matchMedia` here would read as visible on
+ * the client but hidden on the server for reduced-motion visitors, a
+ * guaranteed hydration mismatch. Reduced motion is instead handled in
+ * globals.css by stripping the transition, so the reveal still happens,
+ * just without the animation.
  *
- * Always starts hidden on both server and client renders — branching the
- * initial state on `window.matchMedia` here would read as visible on the
- * client but hidden on the server for reduced-motion visitors, a guaranteed
- * hydration mismatch. Reduced motion is instead handled in globals.css by
- * stripping the transition, so the reveal still happens, just without the
- * animation. */
+ * Two safety nets on top of the IntersectionObserver, both hit in real
+ * testing: (1) a synchronous getBoundingClientRect() check on mount, since
+ * Chrome DevTools' device-toolbar viewport emulation can report a stale
+ * first IntersectionObserver callback right after a simulated resize,
+ * leaving already-on-screen content stuck at opacity-0 until the user
+ * happens to scroll; (2) a timeout that forces visibility regardless, so a
+ * misfiring observer in any environment can never hide content forever. */
 export function Reveal({
   children,
   className,
@@ -30,6 +37,13 @@ export function Reveal({
     const el = ref.current;
     if (!el) return;
 
+    const rect = el.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    if (rect.top < viewportHeight && rect.bottom > 0) {
+      setVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -40,7 +54,13 @@ export function Reveal({
       { threshold: 0.15, rootMargin: "0px 0px -80px 0px" },
     );
     observer.observe(el);
-    return () => observer.disconnect();
+
+    const safetyTimer = setTimeout(() => setVisible(true), SAFETY_TIMEOUT_MS);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(safetyTimer);
+    };
   }, [visible]);
 
   return (

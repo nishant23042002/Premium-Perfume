@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { connectToDatabase } from "@/lib/db/connect";
 import { CategoryShowcaseModel } from "@/models/CategoryShowcase";
 
@@ -8,11 +9,14 @@ export type CategoryShowcaseCard = {
   image: { publicId: string; alt: string };
 };
 
-export async function getActiveCategoryShowcase(): Promise<CategoryShowcaseCard[]> {
+// Wrapped in `cache()` — called from the storefront layout, Header, and the
+// home page in the same request; without memoization that's 3 identical
+// queries per home-page load.
+export const getActiveCategoryShowcase = cache(async (): Promise<CategoryShowcaseCard[]> => {
   await connectToDatabase();
   const cards = await CategoryShowcaseModel.find({ isActive: true }).sort({ order: 1, createdAt: 1 }).lean();
   return JSON.parse(JSON.stringify(cards));
-}
+});
 
 export type AdminCategoryShowcaseCard = {
   _id: string;

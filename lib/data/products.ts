@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { connectToDatabase } from "@/lib/db/connect";
 import { ProductModel } from "@/models/Product";
 import { CategoryModel } from "@/models/Category";
@@ -74,15 +75,18 @@ export async function getProductsForAdmin(): Promise<AdminProduct[]> {
   return JSON.parse(JSON.stringify(products));
 }
 
-/** General-purpose "You May Also Like" pool — used by the cart drawer and checkout upsell. */
-export async function getRecommendedProducts(limit = 8): Promise<ProductCardData[]> {
+/** General-purpose "You May Also Like" pool — used by the cart drawer,
+ * checkout upsell, and the header search's featured grid, all in the same
+ * request. Wrapped in `cache()` so those callers share one query instead of
+ * each firing their own — as long as they pass the same `limit`. */
+export const getRecommendedProducts = cache(async (limit = 8): Promise<ProductCardData[]> => {
   await connectToDatabase();
   const products = await ProductModel.find({ status: "active" }, CARD_PROJECTION)
     .sort({ "rating.average": -1 })
     .limit(limit)
     .lean();
   return JSON.parse(JSON.stringify(products));
-}
+});
 
 const SORT_MAP: Record<SortOption, Record<string, 1 | -1>> = {
   newest: { createdAt: -1 },
@@ -194,11 +198,14 @@ export type ProductDetail = {
   seo?: { metaTitle?: string; metaDescription?: string };
 };
 
-export async function getProductBySlug(slug: string): Promise<ProductDetail | null> {
+// Wrapped in `cache()` — the PDP's generateMetadata and the page component
+// both need this by slug, and without memoization that's two identical
+// round trips to Mongo for every single product page load.
+export const getProductBySlug = cache(async (slug: string): Promise<ProductDetail | null> => {
   await connectToDatabase();
   const product = await ProductModel.findOne({ slug, status: "active" }).lean();
   return product ? JSON.parse(JSON.stringify(product)) : null;
-}
+});
 
 export async function getRelatedProducts(
   productId: string,

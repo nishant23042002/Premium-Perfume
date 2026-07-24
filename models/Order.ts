@@ -30,7 +30,9 @@ const addressSchema = new Schema(
 const orderSchema = new Schema(
   {
     orderNumber: { type: String, required: true, unique: true, index: true },
-    userId: { type: Schema.Types.ObjectId, ref: "User" },
+    // Indexed — getOrdersByUserId() (every account page load) filters on
+    // this and was doing a full collection scan without it.
+    userId: { type: Schema.Types.ObjectId, ref: "User", index: true },
 
     items: { type: [orderItemSchema], required: true },
 

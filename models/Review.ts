@@ -17,6 +17,11 @@ const reviewSchema = new Schema(
   { timestamps: true },
 );
 
+// Matches getFeaturedReviews' `{status: "approved"}` filter sorted by
+// `{rating: -1, createdAt: -1}` — also serves the admin dashboard's
+// `{status: "pending"}` count and the admin review list's status filter.
+reviewSchema.index({ status: 1, rating: -1, createdAt: -1 });
+
 export type Review = InferSchemaType<typeof reviewSchema>;
 
 export const ReviewModel = models.Review ?? model("Review", reviewSchema);

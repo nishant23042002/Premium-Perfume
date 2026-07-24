@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { connectToDatabase } from "@/lib/db/connect";
 import { CollectionModel } from "@/models/Collection";
 
@@ -9,14 +10,16 @@ export type CollectionDetail = {
   productIds: string[];
 };
 
-export async function getCollectionBySlug(slug: string): Promise<CollectionDetail | null> {
+// Wrapped in `cache()` — the collection page's generateMetadata and the
+// page component both need this by slug.
+export const getCollectionBySlug = cache(async (slug: string): Promise<CollectionDetail | null> => {
   await connectToDatabase();
   const collection = await CollectionModel.findOne(
     { slug },
     "name slug description productIds",
   ).lean();
   return collection ? JSON.parse(JSON.stringify(collection)) : null;
-}
+});
 
 export type AdminCollection = {
   id: string;

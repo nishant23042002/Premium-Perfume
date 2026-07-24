@@ -171,38 +171,6 @@ body {
   animation: route-loader-sweep 1.3s cubic-bezier(0.65, 0, 0.35, 1) infinite alternate;
 }
 
-/* Consistent, brand-wide page-content transition — every route change plays
-   this same fade + subtle rise, at the same duration, regardless of how the
-   navigation was triggered (Link, back/forward, redirect). See
-   app/(storefront)/template.tsx for how the remount is triggered. */
-@keyframes page-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Reduced-motion variant of the above — opacity only, no positional
-   movement, and quicker. Per prefers-reduced-motion guidance, the sliding
-   motion is what should go, not all visual feedback — a brief fade is
-   generally considered safe. */
-@keyframes page-fade-in-reduced {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.animate-page-fade {
-  animation: page-fade-in 400ms ease-out;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .animate-kenburns,
   .animate-fade-in,
@@ -210,10 +178,6 @@ body {
   .animate-slide-in-right,
   .route-loader-bar {
     animation: none;
-  }
-
-  .animate-page-fade {
-    animation: page-fade-in-reduced 150ms ease-out;
   }
 
   .reveal-transition {

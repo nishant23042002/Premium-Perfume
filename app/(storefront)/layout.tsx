@@ -10,6 +10,7 @@ import { CheckoutModal } from "@/components/checkout/CheckoutModal";
 import { CheckoutModalProvider } from "@/lib/checkout-modal-context";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { RouteTransitionOverlay } from "@/components/layout/RouteTransitionOverlay";
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { getCart } from "@/lib/data/cart";
 import { getRecommendedProducts } from "@/lib/data/products";
 import { getCurrentUser } from "@/lib/data/users";
@@ -34,6 +35,7 @@ export default async function StorefrontLayout({
       {/* Storefront only — scoped out of /admin so staff navigating the
           dashboard never mixes into customer traffic analytics. */}
       {gaId && <GoogleAnalytics gaId={gaId} />}
+      <ScrollToTop />
       <Suspense fallback={null}>
         <RouteTransitionOverlay />
       </Suspense>
